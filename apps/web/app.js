@@ -1,98 +1,282 @@
 "use strict";
 
-const sampleSizes = [
-  { size: "M", shoulder: 55, chest: 107, length: 68.5, sleeve: 19.5 },
-  { size: "L", shoulder: 56.5, chest: 110, length: 70.5, sleeve: 20 },
-  { size: "XL", shoulder: 58, chest: 113, length: 72.5, sleeve: 20.5 },
-  { size: "2XL", shoulder: 59.5, chest: 117, length: 74.5, sleeve: 21 },
-  { size: "3XL", shoulder: 61, chest: 120, length: 76.5, sleeve: 21.5 }
+const products = [
+  {
+    id: "tee-sage", name: "鼠尾草绿落肩短袖", category: "top", icon: "👕", color: "#cbd6c4", partner: true,
+    note: "柔和低饱和 · 适合日常", match: 92,
+    sizes: [
+      { size: "M", shoulder: 55, chest: 107, length: 68.5 },
+      { size: "L", shoulder: 56.5, chest: 110, length: 70.5 },
+      { size: "XL", shoulder: 58, chest: 113, length: 72.5 },
+      { size: "2XL", shoulder: 59.5, chest: 117, length: 74.5 },
+      { size: "3XL", shoulder: 61, chest: 120, length: 76.5 }
+    ]
+  },
+  { id: "shirt-blue", name: "雾蓝牛津纺衬衫", category: "top", icon: "👔", color: "#b9cbd4", partner: true, note: "轮廓清楚 · 通勤友好", match: 88 },
+  { id: "pants-khaki", name: "卡其直筒休闲裤", category: "bottom", icon: "👖", color: "#d2c39e", partner: false, note: "直筒不贴腿 · 平衡上身", match: 90 },
+  { id: "jeans-dark", name: "深靛蓝直筒牛仔裤", category: "bottom", icon: "👖", color: "#7f94a4", partner: true, note: "耐搭配 · 下装有重量", match: 86 },
+  { id: "shoe-cream", name: "米白低帮休闲鞋", category: "shoe", icon: "👟", color: "#e6dfcf", partner: true, note: "脚长 25.5–26.3 cm 可试 42", match: 91 },
+  { id: "shoe-brown", name: "棕色德训鞋", category: "shoe", icon: "👟", color: "#b99b7d", partner: false, note: "暖色呼应 · 前掌常规", match: 84 }
 ];
 
+const fallbackSizes = products[0].sizes;
 const state = {
-  step: 1,
-  maxStep: 1,
-  stream: null,
-  photoReady: false,
-  sensorHandler: null,
-  profile: null,
+  view: "home",
+  profile: { height: 175, weight: 68, chest: 96, shoulder: 44, waist: null, foot: 26 },
+  product: products[0],
+  fit: "regular",
   result: null,
+  scene: "daily",
+  lookIndex: 0,
+  stream: null,
   tryonTimer: null
 };
 
-const $ = (selector) => document.querySelector(selector);
+const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 
-function renderSteps() {
-  const labels = ["建档", "商品", "结果", "试穿"];
-  $("#steps").innerHTML = labels.map((label, index) => {
-    const step = index + 1;
-    return `<button type="button" data-go-step="${step}"><span>${step}</span>${label}</button>`;
-  }).join("");
-}
-
-function renderSizeTable() {
-  $("#sizes").innerHTML = sampleSizes.map((row, index) => `
-    <tr data-index="${index}">
-      <td><b>${row.size}</b></td>
-      <td><input aria-label="${row.size} 肩宽" type="number" step="0.1" data-key="shoulder" value="${row.shoulder}"></td>
-      <td><input aria-label="${row.size} 胸围" type="number" step="0.1" data-key="chest" value="${row.chest}"></td>
-      <td><input aria-label="${row.size} 衣长" type="number" step="0.1" data-key="length" value="${row.length}"></td>
-      <td><input aria-label="${row.size} 袖长" type="number" step="0.1" data-key="sleeve" value="${row.sleeve}"></td>
-    </tr>`).join("");
-}
-
-function showStep(step) {
-  if (step > state.maxStep) return;
-  state.step = step;
-  $$("section[data-step]").forEach((panel) => panel.classList.toggle("active", Number(panel.dataset.step) === step));
-  $$("#steps button").forEach((button) => {
-    const buttonStep = Number(button.dataset.goStep);
-    button.classList.toggle("active", buttonStep === step);
-    button.classList.toggle("done", buttonStep < step);
-    button.disabled = buttonStep > state.maxStep;
-  });
+function showView(view) {
+  if (!$("[data-view-panel='" + view + "']")) return;
+  state.view = view;
+  $$("[data-view-panel]").forEach((panel) => panel.classList.toggle("active", panel.dataset.viewPanel === view));
+  $$(".bottom-nav [data-view]").forEach((button) => button.classList.toggle("active", button.dataset.view === view));
+  if (view === "fit") renderSelectedProduct();
+  if (view === "match") renderLook();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-function unlockAndShow(step) {
-  state.maxStep = Math.max(state.maxStep, step);
-  showStep(step);
+function productArt(product) {
+  return `<div class="product-art" style="background:${product.color}">${product.partner ? "<i>合作商品</i>" : ""}<span>${product.icon}</span></div>`;
+}
+
+function productTags(product) {
+  return `<div class="tags"><span class="tag">适合度 ${product.match}%</span>${product.partner ? '<span class="tag partner">合作商品</span>' : '<span class="tag">示例商品</span>'}</div>`;
+}
+
+function renderProducts(category = "all") {
+  const shown = products.filter((item) => category === "all" || item.category === category);
+  $("#productList").innerHTML = shown.map((product) => `
+    <button class="product-row" data-product="${product.id}">
+      ${productArt(product)}
+      <span class="product-copy"><b>${product.name}</b><p>${product.note}</p>${productTags(product)}</span>
+    </button>`).join("");
+  $$("[data-product]").forEach((button) => button.addEventListener("click", () => selectProduct(button.dataset.product)));
+}
+
+function renderHomeProducts() {
+  $("#homeProducts").innerHTML = products.filter((item) => item.partner).slice(0, 3).map((product) => `
+    <button class="product-mini" data-home-product="${product.id}">${productArt(product)}<div><b>${product.name}</b><small>适合度 ${product.match}%</small></div></button>`).join("");
+  $$('[data-home-product]').forEach((button) => button.addEventListener("click", () => selectProduct(button.dataset.homeProduct)));
+}
+
+function selectProduct(id) {
+  state.product = products.find((item) => item.id === id) || products[0];
+  if (state.product.category === "top") {
+    if (!state.product.sizes) state.product.sizes = fallbackSizes;
+    showView("fit");
+  } else if (state.product.category === "shoe") {
+    showToast(`根据脚长 ${state.profile.foot || "未填写"} cm，${state.product.name} 建议先试 42 码；当前为示例规则。`);
+  } else {
+    showToast("裤装合身引擎将在下一阶段接入；已将商品加入搭配演示。 ");
+    state.lookIndex = products.indexOf(state.product);
+    showView("match");
+  }
+}
+
+function renderSelectedProduct() {
+  const product = state.product;
+  $("#selectedProduct").innerHTML = `<div class="selected-product">${productArt(product)}<div><p class="eyebrow">正在分析</p><h2>${product.name}</h2><p>${product.note}</p>${productTags(product)}</div></div>`;
+  $("#fitHeight").value = state.profile.height;
+  $("#fitWeight").value = state.profile.weight;
+  $("#fitChest").value = state.profile.chest || "";
+  $("#fitShoulder").value = state.profile.shoulder || "";
+  const sizes = product.sizes || fallbackSizes;
+  $("#fitSizeRows").innerHTML = sizes.map((row) => `<tr><td><b>${row.size}</b></td><td>${row.shoulder}</td><td>${row.chest}</td><td>${row.length}</td></tr>`).join("");
+}
+
+const easeTargets = {
+  slim: { label: "修身", range: [0, 4] },
+  regular: { label: "合体", range: [4, 8] },
+  relaxed: { label: "微宽松", range: [8, 14] },
+  oversized: { label: "宽松", range: [14, 22] }
+};
+
+function calculateFit() {
+  const height = Number($("#fitHeight").value);
+  const weight = Number($("#fitWeight").value);
+  const chest = Number($("#fitChest").value) || null;
+  const shoulder = Number($("#fitShoulder").value) || null;
+  if (height < 130 || height > 220 || weight < 30 || weight > 200) {
+    $("#fitError").textContent = "请检查身高和体重是否在合理范围内。";
+    return;
+  }
+  $("#fitError").textContent = "";
+  state.profile = { ...state.profile, height, weight, chest, shoulder };
+  const sizes = state.product.sizes || fallbackSizes;
+  const target = easeTargets[state.fit];
+  const center = (target.range[0] + target.range[1]) / 2;
+  let ranked = sizes.map((row) => ({ ...row, ease: chest ? row.chest - chest : null }));
+  if (chest) ranked.sort((a, b) => Math.abs(a.ease - center) - Math.abs(b.ease - center));
+  const primary = chest ? ranked[0] : sizes[1] || sizes[0];
+  state.result = {
+    primary,
+    alternative: chest ? ranked[1] : sizes[2] || sizes[0],
+    target,
+    chest,
+    shoulder,
+    height,
+    reliable: Boolean(chest),
+    shoulderDelta: shoulder ? primary.shoulder - shoulder : null,
+    lengthRatio: primary.length / height
+  };
+  renderResult();
+  saveProfile();
+  showView("result");
+}
+
+function relationText(status, low, high) {
+  if (status === null) return "数据不足";
+  if (status < low) return "偏紧";
+  if (status > high) return "偏宽松";
+  return "接近目标";
+}
+
+function renderResult() {
+  const result = state.result;
+  const product = state.product;
+  const unique = result.reliable;
+  $("#resultTitle").textContent = unique ? `建议优先试 ${result.primary.size} 码` : "暂不输出唯一尺码";
+  $("#resultSubtitle").textContent = unique
+    ? `${product.name} · 目标效果“${result.target.label}”`
+    : `缺少可靠胸围，先保留 ${result.primary.size} / ${result.alternative.size} 两个候选。`;
+  $("#resultHero").innerHTML = unique
+    ? `<p class="eyebrow">首选尺码</p><div class="result-size">${result.primary.size}</div><h2>胸围松量约 ${result.primary.ease.toFixed(1)} cm</h2><p>最接近“${result.target.label}”的演示区间 ${result.target.range[0]}–${result.target.range[1]} cm。</p><span class="confidence">可信度：中 · 含手工胸围</span>`
+    : `<p class="eyebrow">候选尺码</p><div class="result-size">${result.primary.size}/${result.alternative.size}</div><h2>补充胸围后才能给出单一建议</h2><p>身高体重不足以判断衣服能否穿下，系统不会为了完整而编造答案。</p><span class="confidence">可信度：低 · 已降级</span>`;
+
+  const shoulderValue = result.shoulderDelta;
+  const shoulderLabel = shoulderValue === null ? "无法判断" : shoulderValue > 12 ? "明显落肩" : shoulderValue > 7 ? "轻至中度落肩" : "接近正肩";
+  const lengthLabel = result.lengthRatio > .42 ? "衣身偏长" : result.lengthRatio > .39 ? "常规偏长" : "常规衣长";
+  const easeLabel = result.chest ? relationText(result.primary.ease, result.target.range[0], result.target.range[1]) : "无法判断";
+  const dimensions = [
+    ["胸围松量", easeLabel, result.chest ? `${result.primary.chest} − ${result.chest} = ${result.primary.ease.toFixed(1)} cm。` : "单张照片不自动推算胸围；请手工填写后再计算。"],
+    ["肩线关系", shoulderLabel, shoulderValue === null ? "未填写人体肩宽，因此不输出肩线落点。" : `成衣肩宽比人体参考肩宽大 ${shoulderValue.toFixed(1)} cm；落肩款只能做关系描述。`],
+    ["衣长关系", lengthLabel, `衣长 ${result.primary.length} cm，约为身高的 ${(result.lengthRatio * 100).toFixed(1)}%；真实衣摆位置仍需关键点校准。`],
+    ["备选方案", result.alternative.size + " 码", unique ? `如果希望更${result.alternative.chest > result.primary.chest ? "宽松" : "修身"}，可把 ${result.alternative.size} 作为试穿备选。` : "两个候选都需要结合实穿或补充数据判断。"]
+  ];
+  $("#fitDimensions").innerHTML = dimensions.map(([name, value, detail]) => `<article class="dimension-card"><b>${name}</b><b>${value}</b><p>${detail}</p></article>`).join("");
+}
+
+const looks = {
+  daily: [
+    { top: "tee-sage", bottom: "pants-khaki", shoe: "shoe-cream", reason: "低饱和同类色，日常但不单调", detail: "鼠尾草绿和卡其色保持柔和，米白鞋让下半身更轻；上衣略短、裤型直，比例更利落。" },
+    { top: "shirt-blue", bottom: "jeans-dark", shoe: "shoe-brown", reason: "上浅下深，让视觉重心更稳定", detail: "雾蓝衬衫负责清爽，深靛牛仔裤压住下半身，棕色鞋增加一点温度。" }
+  ],
+  date: [
+    { top: "shirt-blue", bottom: "pants-khaki", shoe: "shoe-brown", reason: "柔和对比，比全身黑更容易亲近", detail: "蓝、卡其与棕色都不抢眼，轮廓整洁，适合见面但没有刻意正式感。" },
+    { top: "tee-sage", bottom: "jeans-dark", shoe: "shoe-cream", reason: "颜色克制，把注意力留给人", detail: "深浅关系清楚，鞋子提亮；配饰不需要再堆很多颜色。" }
+  ],
+  weekend: [
+    { top: "tee-sage", bottom: "jeans-dark", shoe: "shoe-brown", reason: "自然色组合，耐脏也适合拍照", detail: "绿色与棕色相互呼应，深色牛仔裤适合走动；整体松弛但不拖沓。" },
+    { top: "shirt-blue", bottom: "pants-khaki", shoe: "shoe-cream", reason: "明亮轻松，适合白天户外", detail: "三个单品都偏浅，用不同材质拉开层次，避免看起来像一整块。" }
+  ]
+};
+
+function renderLook() {
+  const options = looks[state.scene];
+  const look = options[state.lookIndex % options.length];
+  const keys = [["上衣", look.top], ["裤子", look.bottom], ["鞋子", look.shoe]];
+  $("#matchLook").innerHTML = keys.map(([label, id]) => {
+    const product = products.find((item) => item.id === id);
+    return `<article class="look-item">${productArt(product)}<b>${label}</b><small>${product.name}</small></article>`;
+  }).join("");
+  $("#matchReason").textContent = look.reason;
+  $("#matchDetail").textContent = look.detail + " 当前为规则文案与假数据演示。";
+}
+
+function runTryon() {
+  clearTimeout(state.tryonTimer);
+  const button = $("#runTryon");
+  const job = $("#tryonJob");
+  const canvas = $("#tryonCanvas");
+  button.disabled = true;
+  job.className = "job-card running";
+  job.querySelector("b").textContent = "正在分析人物与商品图";
+  job.querySelector("p").textContent = "Mock job_001 · 模拟排队与生成状态";
+  canvas.classList.remove("ready");
+  canvas.querySelector("p").textContent = "生成中…";
+  state.tryonTimer = setTimeout(() => {
+    job.querySelector("b").textContent = "正在生成视觉参考";
+    job.querySelector("p").textContent = "此处未来接入专用 VTON 服务，不用普通提示词代替精确合身。";
+    state.tryonTimer = setTimeout(() => {
+      button.disabled = false;
+      job.className = "job-card";
+      job.querySelector("b").textContent = "演示结果已生成";
+      job.querySelector("p").textContent = "本次只改变示意轮廓与颜色，没有上传任何照片。";
+      canvas.classList.add("ready");
+      canvas.querySelector("p").textContent = `${state.product.name} · ${easeTargets[state.fit].label}氛围参考`;
+    }, 1200);
+  }, 900);
+}
+
+const labContent = {
+  hair: ["✂️", "发型与发色灵感", "模拟：比较短层次、自然卷与深茶色。正式版需要人脸与发型参考图生成。"],
+  body: ["↕️", "体态与轮廓情景", "模拟：展示肩背打开、腰线变化等视觉情景，不预测减重后的真实结果。"],
+  style: ["🎨", "陌生风格试验", "模拟：从日常松弛切换到清爽通勤，同时保留你不喜欢紧绷感的偏好。"],
+  animal: ["🦊", "赤狐型 · 敏锐而松弛", "动物人格负责陪伴、表达与审美偏好，不替代身体数据或尺码计算。"]
+};
+
+function renderLab(type) {
+  $$("[data-lab]").forEach((button) => button.classList.toggle("active", button.dataset.lab === type));
+  const [icon, title, text] = labContent[type];
+  $("#labStage").innerHTML = `<div class="animal-avatar large">${icon}</div><div><b>${title}</b><p>${text}</p><button class="text-button" type="button">生成一组模拟方案 →</button></div>`;
+  $("#labStage button").addEventListener("click", () => showToast("已生成 3 个概念方案（Demo 假数据）"));
+}
+
+function saveProfile() {
+  try { localStorage.setItem("ziru-demo-profile", JSON.stringify(state.profile)); } catch {}
+  const filled = Object.values(state.profile).filter(Boolean).length;
+  $("#profileCompleteness").textContent = `当前完整度 ${Math.round(filled / 6 * 100)}%`;
+}
+
+function loadProfile() {
+  try {
+    const saved = JSON.parse(localStorage.getItem("ziru-demo-profile"));
+    if (saved && typeof saved === "object") state.profile = { ...state.profile, ...saved };
+  } catch {}
+  const mapping = { Height: "height", Weight: "weight", Chest: "chest", Shoulder: "shoulder", Waist: "waist", Foot: "foot" };
+  Object.entries(mapping).forEach(([suffix, key]) => { $("#profile" + suffix).value = state.profile[key] || ""; });
+  saveProfile();
+}
+
+function submitProfile(event) {
+  event.preventDefault();
+  const field = (name) => Number($("#profile" + name).value) || null;
+  state.profile = { height: field("Height"), weight: field("Weight"), chest: field("Chest"), shoulder: field("Shoulder"), waist: field("Waist"), foot: field("Foot") };
+  saveProfile();
+  showToast("身体档案已保存在当前浏览器");
+  showView("home");
 }
 
 async function openCamera() {
   const message = $("#cameraMessage");
-  const badge = $("#cameraBadge");
   if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
-    badge.textContent = "无法调用";
-    badge.className = "status-badge error";
-    message.textContent = "当前环境不能直接调用相机。请使用 HTTPS 或 localhost，也可以从相册选择照片继续。";
+    message.textContent = "浏览器相机需要 HTTPS 或 localhost；你仍可使用系统相册/相机上传。";
     return;
   }
-
   stopCamera();
   message.textContent = "正在请求相机权限…";
   try {
-    state.stream = await navigator.mediaDevices.getUserMedia({
-      audio: false,
-      video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 1920 } }
-    });
-    const video = $("#video");
+    state.stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 1920 } } });
+    const video = $("#cameraVideo");
     video.srcObject = state.stream;
     await video.play();
     video.hidden = false;
-    $("#placeholder").hidden = true;
-    $("#canvas").hidden = true;
-    $("#capture").hidden = false;
-    badge.textContent = "相机已开启";
-    badge.className = "status-badge success";
-    message.textContent = "请保持全身入镜并站稳，然后拍摄。";
+    $("#cameraPlaceholder").hidden = true;
+    $("#cameraCanvas").hidden = true;
+    $("#capturePhoto").hidden = false;
+    message.textContent = "相机已开启，请保持头顶和脚底完整入镜。";
   } catch (error) {
-    const denied = error?.name === "NotAllowedError" || error?.name === "SecurityError";
-    badge.textContent = denied ? "权限未授予" : "相机不可用";
-    badge.className = "status-badge error";
-    message.textContent = denied
-      ? "你没有授权相机。可以在浏览器设置中重新允许，或从相册选择照片。"
-      : "没有找到可用相机，或相机正被其他应用占用。可从相册选择照片继续。";
+    message.textContent = error?.name === "NotAllowedError" ? "未获得相机权限，可改用相册选择。" : "相机不可用或正被其他程序占用。";
   }
 }
 
@@ -101,259 +285,90 @@ function stopCamera() {
   state.stream = null;
 }
 
-function captureFrame() {
-  const video = $("#video");
+function capturePhoto() {
+  const video = $("#cameraVideo");
   if (!video.videoWidth) return;
-  const canvas = $("#canvas");
+  const canvas = $("#cameraCanvas");
   canvas.width = video.videoWidth;
   canvas.height = video.videoHeight;
   canvas.getContext("2d").drawImage(video, 0, 0);
   canvas.hidden = false;
   video.hidden = true;
-  $("#placeholder").hidden = true;
-  state.photoReady = true;
+  $("#capturePhoto").hidden = true;
   stopCamera();
-  $("#capture").hidden = true;
-  $("#cameraBadge").textContent = "照片已就绪";
-  $("#cameraBadge").className = "status-badge success";
-  $("#cameraMessage").textContent = "照片仅用于本地流程演示；当前未运行真实人体测量模型。";
+  $("#cameraMessage").textContent = "照片仅保留在当前页面内存中；Demo 未运行人体测量模型。";
 }
 
-function loadLocalPhoto(file) {
-  if (!file) return;
-  if (!file.type.startsWith("image/")) {
-    $("#cameraMessage").textContent = "请选择 JPG、PNG、HEIC 等图片文件。";
-    return;
-  }
+function loadPhoto(file, canvasSelector, placeholderSelector, messageSelector) {
+  if (!file?.type.startsWith("image/")) return;
   const image = new Image();
-  const objectUrl = URL.createObjectURL(file);
+  const url = URL.createObjectURL(file);
   image.onload = () => {
-    const canvas = $("#canvas");
-    const maxWidth = 1200;
-    const scale = Math.min(1, maxWidth / image.naturalWidth);
+    const canvas = $(canvasSelector);
+    const scale = Math.min(1, 1200 / image.naturalWidth);
     canvas.width = Math.round(image.naturalWidth * scale);
     canvas.height = Math.round(image.naturalHeight * scale);
     canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
     canvas.hidden = false;
-    $("#video").hidden = true;
-    $("#placeholder").hidden = true;
-    state.photoReady = true;
-    stopCamera();
-    $("#capture").hidden = true;
-    $("#cameraBadge").textContent = "本地照片已就绪";
-    $("#cameraBadge").className = "status-badge success";
-    $("#cameraMessage").textContent = "照片只保留在当前页面内存中；刷新或重置后清除。";
-    URL.revokeObjectURL(objectUrl);
+    $(placeholderSelector).hidden = true;
+    if (messageSelector) $(messageSelector).textContent = "图片已载入本机内存，刷新页面后清除。";
+    URL.revokeObjectURL(url);
   };
-  image.onerror = () => {
-    URL.revokeObjectURL(objectUrl);
-    $("#cameraMessage").textContent = "浏览器无法读取这张照片，请换一张重试。";
-  };
-  image.src = objectUrl;
+  image.src = url;
 }
 
-function readOrientation(event) {
-  const beta = typeof event.beta === "number" ? event.beta : null;
-  const gamma = typeof event.gamma === "number" ? event.gamma : null;
-  const message = $("#sensorMessage");
-  if (beta === null || gamma === null) {
-    message.textContent = "设备没有返回角度数据，可以跳过并按画面引导拍摄。";
-    return;
-  }
-  const sideTilt = Math.abs(gamma);
-  message.textContent = sideTilt <= 8
-    ? `横向倾斜约 ${sideTilt.toFixed(1)}°，处于演示引导范围内。`
-    : `横向倾斜约 ${sideTilt.toFixed(1)}°，建议扶正手机；±8° 只是待验证的演示阈值。`;
-}
-
-async function requestOrientation() {
-  const message = $("#sensorMessage");
-  if (!("DeviceOrientationEvent" in window)) {
-    message.textContent = "此设备不支持方向传感器。已跳过，不影响后续流程。";
-    return;
-  }
-  try {
-    if (typeof DeviceOrientationEvent.requestPermission === "function") {
-      const permission = await DeviceOrientationEvent.requestPermission();
-      if (permission !== "granted") throw new Error("permission-denied");
-    }
-    if (state.sensorHandler) window.removeEventListener("deviceorientation", state.sensorHandler);
-    state.sensorHandler = readOrientation;
-    window.addEventListener("deviceorientation", state.sensorHandler, { passive: true });
-    message.textContent = "角度检测已开启。若数值不出现，也可以直接跳过。";
-  } catch {
-    message.textContent = "方向权限未授予。已跳过，不影响拍照和尺码流程。";
-  }
-}
-
-function submitProfile(event) {
-  event.preventDefault();
-  const height = Number($("#height").value);
-  const weight = Number($("#weight").value);
-  const chest = Number($("#chest").value) || null;
-  const shoulder = Number($("#shoulder").value) || null;
-  const error = $("#profileError");
-  if (height < 130 || height > 220 || weight < 30 || weight > 200) {
-    error.textContent = "请检查身高和体重：演示范围为身高 130–220 cm、体重 30–200 kg。";
-    return;
-  }
-  error.textContent = "";
-  state.profile = {
-    system: $("input[name='system']:checked").value,
-    height,
-    weight,
-    chest,
-    shoulder,
-    photoSource: state.photoReady ? "local_photo" : "not_provided"
-  };
-  unlockAndShow(2);
-}
-
-function currentRows() {
-  return $$("#sizes tr").map((tr) => {
-    const base = sampleSizes[Number(tr.dataset.index)];
-    const values = Object.fromEntries($$("input", tr).map((input) => [input.dataset.key, Number(input.value)]));
-    return { size: base.size, ...values };
-  });
-}
-
-function targetEase(fit) {
-  return ({ "修身": [0, 4], "合体": [4, 8], "微宽松": [8, 14], "宽松": [14, 22] })[fit];
-}
-
-function calculateResult() {
-  const fit = $("input[name='fit']:checked").value;
-  const rows = currentRows();
-  const chest = state.profile.chest;
-  const shoulder = state.profile.shoulder;
-  let ranked = rows;
-  let recommended = null;
-
-  if (chest) {
-    const [minEase, maxEase] = targetEase(fit);
-    const center = (minEase + maxEase) / 2;
-    ranked = [...rows].sort((a, b) => Math.abs((a.chest - chest) - center) - Math.abs((b.chest - chest) - center));
-    recommended = ranked[0];
-  }
-
-  const visualShoulder = shoulder;
-  const primary = recommended || rows[Math.min(1, rows.length - 1)];
-  const shoulderDelta = visualShoulder === null ? null : primary.shoulder - visualShoulder;
-  const lengthRelation = primary.length / state.profile.height;
-  state.result = { fit, rows, recommended, primary, visualShoulder, shoulderDelta, lengthRelation };
-  renderResult();
-  unlockAndShow(3);
-}
-
-function renderResult() {
-  const { recommended, primary, fit, shoulderDelta, lengthRelation } = state.result;
-  const hasChest = Boolean(state.profile.chest);
-  const card = $("#recommendation");
-  if (hasChest) {
-    const ease = primary.chest - state.profile.chest;
-    card.innerHTML = `<p class="result-label">MOCK 候选建议</p><h3>${primary.size} 码</h3><p>胸围松量约 ${ease.toFixed(1)} cm，最接近“${fit}”演示区间。结论仍需真实规则校准和用户试穿反馈验证。</p><span class="confidence">数据质量：中 · 含人工胸围</span>`;
-  } else {
-    card.innerHTML = `<p class="result-label">数据不足 · 已降级</p><h3>${primary.size} / ${state.result.rows[Math.min(2, state.result.rows.length - 1)].size} 候选</h3><p>没有可靠人体胸围，系统不能判断能否穿下，也不会给出唯一精准尺码。补充软尺胸围后才能比较胸围松量。</p><span class="confidence">置信度：低 · 仅演示肩部与衣长</span>`;
-  }
-  $("#resultIntro").textContent = `以 ${primary.size} 码作为示意，目标效果为“${fit}”。`;
-
-  const shoulderText = shoulderDelta === null ? "缺少可靠人体肩宽" : shoulderDelta > 12 ? "明显落肩" : shoulderDelta > 7 ? "轻至中度落肩" : "接近正肩关系";
-  const lengthText = lengthRelation > 0.42 ? "偏长衣身" : lengthRelation > 0.39 ? "常规偏长" : "常规衣长";
-  const items = [
-    {
-      title: "肩部关系",
-      value: shoulderText,
-      detail: shoulderDelta === null ? `成衣肩宽 ${primary.shoulder} cm；未提供人工肩峰宽，因此不计算肩宽差。` : `成衣肩宽 ${primary.shoulder} cm；人工肩峰宽 ${state.result.visualShoulder.toFixed(1)} cm；两种口径仅作实验关系展示，不能直接等同。`,
-      rule: state.profile.shoulder ? "依据：人工肩峰宽 + MOCK_SHOULDER_RELATION" : "拒答规则：MISSING_RELIABLE_SHOULDER"
-    },
-    {
-      title: "胸围松量",
-      value: hasChest ? `${(primary.chest - state.profile.chest).toFixed(1)} cm` : "无法计算",
-      detail: hasChest ? `成衣胸围 ${primary.chest} cm − 人体胸围 ${state.profile.chest} cm。` : "单张正面照片不用于自动推算胸围；因此只展示候选与风险。",
-      rule: hasChest ? "依据：MOCK_CHEST_EASE_V0 · 阈值待真人校准" : "拒答规则：MISSING_RELIABLE_CHEST"
-    },
-    {
-      title: "纵向关系",
-      value: lengthText,
-      detail: `衣长 ${primary.length} cm，约为身高的 ${(lengthRelation * 100).toFixed(1)}%。这里只表达比例，不代表真实衣摆落点。`,
-      rule: "依据：MOCK_LENGTH_RATIO_V0 · 需关键点与实穿校准"
-    }
-  ];
-  $("#dimensions").innerHTML = items.map((item) => `<article class="card dimension"><h3>${item.title}</h3><b>${item.value}</b><p class="tip">${item.detail}</p><small>${item.rule}</small></article>`).join("");
-}
-
-function setTryonStatus(kind, title, message) {
-  const box = $("#job");
-  box.className = `card row ${kind}`;
-  box.querySelector("h3").textContent = title;
-  box.querySelector("p").textContent = message;
-}
-
-function simulateTryon(shouldFail = false) {
-  clearTimeout(state.tryonTimer);
-  $("#tryon").disabled = true;
-  $("#tryonOutput").className = "tryon-output";
-  $("#tryonOutput").innerHTML = "<span>任务排队中…</span>";
-  setTryonStatus("processing", "任务已排队", "Mock job_001 · 等待异步适配器处理");
-  state.tryonTimer = setTimeout(() => {
-    setTryonStatus("processing", "正在生成视觉参考", "人物与商品图未上传；当前仅演示状态轮询。");
-    $("#tryonOutput").innerHTML = "<span>处理中…</span>";
-    state.tryonTimer = setTimeout(() => {
-      $("#tryon").disabled = false;
-      if (shouldFail) {
-        setTryonStatus("failure", "生成失败，但合身结果仍然有效", "可重新尝试；失败不会修改 STEP 03 的计算结论。");
-        $("#tryonOutput").innerHTML = "<span>本次生成失败</span>";
-      } else {
-        setTryonStatus("success", "视觉参考已生成", "Mock 结果 · 正式版必须明确标注由 AI 生成。");
-        $("#tryonOutput").className = "tryon-output is-ready";
-        $("#tryonOutput").innerHTML = "<span>AI 视觉参考<br><small>轻落肩 · 合体感</small></span>";
-      }
-    }, 1300);
-  }, 900);
-}
-
-function resetApp() {
-  stopCamera();
-  clearTimeout(state.tryonTimer);
-  if (state.sensorHandler) window.removeEventListener("deviceorientation", state.sensorHandler);
-  state.step = 1;
-  state.maxStep = 1;
-  state.photoReady = false;
-  state.profile = null;
-  state.result = null;
-  $("#profile").reset();
-  $("#height").value = "175";
-  $("#weight").value = "68";
-  $("#video").hidden = true;
-  $("#canvas").hidden = true;
-  $("#placeholder").hidden = false;
-  $("#capture").hidden = true;
-  $("#cameraBadge").textContent = "尚未检测";
-  $("#cameraBadge").className = "status-badge neutral";
-  $("#cameraMessage").textContent = "";
-  $("#sensorMessage").textContent = "";
-  setTryonStatus("idle", "尚未提交", "演示适配器不会调用云服务或上传照片。");
-  $("#tryonOutput").className = "tryon-output";
-  $("#tryonOutput").innerHTML = "<span>等待生成</span>";
-  renderSizeTable();
-  showStep(1);
+let toastTimer;
+function showToast(message) {
+  const toast = $("#toast");
+  toast.textContent = message;
+  toast.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove("show"), 2600);
 }
 
 function bindEvents() {
-  $$("#steps button").forEach((button) => button.addEventListener("click", () => showStep(Number(button.dataset.goStep))));
+  $$('[data-view]').forEach((button) => button.addEventListener("click", () => showView(button.dataset.view)));
+  $("[data-action='start-buy']").addEventListener("click", () => showView("shop"));
+  $("#demoInfo").addEventListener("click", () => $("#infoDialog").showModal());
+  $(".dialog-close").addEventListener("click", () => $("#infoDialog").close());
+  $("#infoDialog").addEventListener("click", (event) => { if (event.target === $("#infoDialog")) $("#infoDialog").close(); });
+  $("#uploadProduct").addEventListener("click", () => $("#productFile").click());
+  $("#productFile").addEventListener("change", (event) => {
+    if (!event.target.files[0]) return;
+    $("#uploadStatus").textContent = "商品截图已在本地读取。OCR 当前为模拟：已识别为“短袖 T 恤”，请确认示例尺码表。";
+    state.product = { ...products[0], id: "user-upload", name: "我上传的短袖商品", partner: false, note: "本地图片 · 尺码表识别为 Demo 模拟" };
+    setTimeout(() => showView("fit"), 450);
+  });
+  $("#browsePartners").addEventListener("click", () => $("#productList").scrollIntoView({ behavior: "smooth" }));
+  $$("[data-category]").forEach((button) => button.addEventListener("click", () => {
+    $$("[data-category]").forEach((item) => item.classList.toggle("active", item === button));
+    renderProducts(button.dataset.category);
+  }));
+  $$("[data-fit]").forEach((button) => button.addEventListener("click", () => {
+    state.fit = button.dataset.fit;
+    $$("[data-fit]").forEach((item) => item.classList.toggle("active", item === button));
+  }));
+  $("#calculateFit").addEventListener("click", calculateFit);
+  $("#generateTryon").addEventListener("click", () => showView("tryon"));
+  $("#addToMatch").addEventListener("click", () => showView("match"));
+  $("#runTryon").addEventListener("click", runTryon);
+  $$("[data-scene]").forEach((button) => button.addEventListener("click", () => {
+    state.scene = button.dataset.scene;
+    state.lookIndex = 0;
+    $$("[data-scene]").forEach((item) => item.classList.toggle("active", item === button));
+    renderLook();
+  }));
+  $("#remixLook").addEventListener("click", () => { state.lookIndex += 1; renderLook(); });
+  $$("[data-lab]").forEach((button) => button.addEventListener("click", () => renderLab(button.dataset.lab)));
+  $("#profileForm").addEventListener("submit", submitProfile);
   $("#openCamera").addEventListener("click", openCamera);
-  $("#capture").addEventListener("click", captureFrame);
-  $("#photo").addEventListener("change", (event) => loadLocalPhoto(event.target.files?.[0]));
-  $("#sensor").addEventListener("click", requestOrientation);
-  $("#profile").addEventListener("submit", submitProfile);
-  $("#calculate").addEventListener("click", calculateResult);
-  $("#toTryon").addEventListener("click", () => unlockAndShow(4));
-  $("#tryon").addEventListener("click", () => simulateTryon(false));
-  $("#tryonFail").addEventListener("click", () => simulateTryon(true));
-  $("#reset").addEventListener("click", resetApp);
+  $("#capturePhoto").addEventListener("click", capturePhoto);
+  $("#bodyPhoto").addEventListener("change", (event) => loadPhoto(event.target.files[0], "#cameraCanvas", "#cameraPlaceholder", "#cameraMessage"));
   window.addEventListener("pagehide", stopCamera);
 }
 
-renderSteps();
-renderSizeTable();
+renderHomeProducts();
+renderProducts();
+loadProfile();
+renderLook();
 bindEvents();

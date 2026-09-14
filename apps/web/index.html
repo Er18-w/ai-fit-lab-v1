@@ -3,62 +3,170 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#f5f1e9">
-  <title>合身研究所 · V1 演示</title>
+  <meta name="theme-color" content="#f3eee4">
+  <title>自如 · AI 审美与合身助手 Demo</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<main>
-  <header><div><small>FIT LAB · V1 PROTOTYPE</small><h1>合身研究所</h1></div><button id="reset" class="link">重新开始</button></header>
-  <nav id="steps" aria-label="流程进度"></nav>
-  <aside><b>演示模式</b> 本页面使用本地 Mock 数据，不上传照片，也不提供裁缝级量体结论。</aside>
+<div class="app-shell">
+  <header class="topbar">
+    <button class="brand" data-view="home" aria-label="返回首页"><span>自如</span><small>和更适合的自己相遇</small></button>
+    <button id="demoInfo" class="text-button">演示说明</button>
+  </header>
 
-  <section data-step="1" class="active">
-    <p class="kicker">STEP 01</p><h2>建立身体档案</h2><p class="lead">填写基本信息，再拍一张正面全身照。胸围可选，但会直接影响尺码结论。</p>
-    <form id="profile">
-      <fieldset><legend>常购服装体系</legend><label><input name="system" type="radio" value="男装" checked> 男装</label><label><input name="system" type="radio" value="女装"> 女装</label><label><input name="system" type="radio" value="中性"> 中性</label></fieldset>
-      <div class="grid">
-        <label>身高（必填）<span><input id="height" type="number" min="130" max="220" value="175" required> cm</span></label>
-        <label>体重（必填）<span><input id="weight" type="number" min="30" max="200" value="68" required> kg</span></label>
-        <label>胸围（选填）<span><input id="chest" type="number" min="60" max="180" placeholder="例如 96"> cm</span></label>
-        <label>人工肩峰宽（选填）<span><input id="shoulder" type="number" min="25" max="70" placeholder="例如 44"> cm</span></label>
-      </div>
-      <article class="card">
-        <div class="row"><h3>正面全身照</h3><em id="cameraBadge">尚未检测</em></div>
-        <p class="tip">穿贴身上衣，竖屏使用 1× 主摄，保持头顶和脚底完整入镜。</p>
-        <div id="stage"><video id="video" playsinline muted hidden></video><canvas id="canvas" hidden></canvas><div id="placeholder">正面站立<br><small>照片只在本机处理</small></div></div>
-        <div class="actions"><button id="openCamera" type="button" class="secondary">打开后置摄像头</button><button id="capture" type="button" class="secondary" hidden>拍摄</button><label class="secondary">从相册选择<input id="photo" type="file" accept="image/*" capture="environment" hidden></label></div>
-        <p id="cameraMessage" class="message" aria-live="polite"></p>
+  <main>
+    <section id="view-home" class="view active" data-view-panel="home">
+      <article class="companion-card">
+        <div class="animal-avatar" aria-hidden="true">🦊</div>
+        <div><p class="eyebrow">你的审美伙伴 · 赤狐型</p><h1>今天想解决哪件事？</h1><p>我记得你的身体数据，也会区分客观合身和主观风格。</p></div>
       </article>
-      <article class="card row sensor"><div><h3>手机角度辅助（可选）</h3><p class="tip">失败时可跳过，不影响后续流程。</p><p id="sensorMessage" class="message"></p></div><button id="sensor" type="button" class="secondary">检测角度</button></article>
-      <p id="profileError" class="error"></p><button class="primary">生成演示测量结果</button>
-    </form>
-  </section>
 
-  <section data-step="2">
-    <p class="kicker">STEP 02</p><h2>确认商品尺码表</h2><p class="lead">样例为成人短袖 T 恤成衣尺寸，正式版须由用户确认测量口径与数值。</p>
-    <article class="card summary"><div><small>数据类型</small><b>成衣尺寸 · 完整围度</b></div><div><small>袖型判断</small><b>疑似落肩</b></div></article>
-    <div class="table"><table><thead><tr><th>尺码</th><th>肩宽</th><th>胸围</th><th>衣长</th><th>袖长</th></tr></thead><tbody id="sizes"></tbody></table></div>
-    <p class="tip">单位 cm。M 码肩宽已达 55 cm，因此肩宽差用于描述落肩程度，不直接判定“过大”。</p>
-    <fieldset><legend>希望穿出什么效果？</legend><label><input name="fit" type="radio" value="修身"> 修身</label><label><input name="fit" type="radio" value="合体" checked> 合体</label><label><input name="fit" type="radio" value="微宽松"> 微宽松</label><label><input name="fit" type="radio" value="宽松"> 宽松</label></fieldset>
-    <button id="calculate" class="primary">计算合身关系</button>
-  </section>
+      <div class="quick-grid">
+        <button class="feature-card primary-feature" data-action="start-buy"><span class="feature-icon">衣</span><b>帮我选衣服</b><small>看尺码、肩线和衣长</small></button>
+        <button class="feature-card" data-view="match"><span class="feature-icon">搭</span><b>搭一整套</b><small>衣服、裤子与鞋子</small></button>
+        <button class="feature-card" data-view="imagine"><span class="feature-icon">镜</span><b>看看不同的我</b><small>发型、发色与体态灵感</small></button>
+        <button class="feature-card" data-view="profile"><span class="feature-icon">我</span><b>完善身体档案</b><small id="profileCompleteness">当前完整度 70%</small></button>
+      </div>
 
-  <section data-step="3">
-    <p class="kicker">STEP 03</p><h2>合身结果</h2><p id="resultIntro" class="lead"></p>
-    <article id="recommendation" class="recommendation"></article>
-    <article class="card"><div class="row"><h3>尺寸关系示意带</h3><em>非物理仿真</em></div><div class="figure"><i class="head"></i><i class="body"></i><i class="band shoulder-band"></i><i class="band hem-band"></i></div></article>
-    <div id="dimensions"></div><button id="toTryon" class="primary">继续看视觉试穿</button>
-  </section>
+      <div class="section-heading"><div><p class="eyebrow">今日推荐</p><h2>适合你的合作商品</h2></div><button class="text-button" data-view="shop">查看全部</button></div>
+      <p class="disclosure">合作商品会明确标注；推荐优先依据适合程度，不等于广告排序。</p>
+      <div id="homeProducts" class="product-strip"></div>
 
-  <section data-step="4">
-    <p class="kicker">STEP 04 · OPTIONAL</p><h2>AI 试穿参考</h2><p class="lead">只表达颜色、风格和大致宽松感，不参与尺码推荐。</p>
-    <div class="tryon"><div class="shirt">T</div><b>→</b><div id="tryonOutput">等待生成</div></div>
-    <article id="job" class="card row"><span class="spinner"></span><div><h3>尚未提交</h3><p class="tip">演示适配器不会调用云服务或上传照片。</p></div></article>
-    <button id="tryon" class="primary">模拟生成试穿图</button><button id="tryonFail" class="link center">演示生成失败状态</button>
-    <article class="card privacy"><h3>照片与隐私</h3><p class="tip">正式接入第三方服务前，需说明上传对象、保存时长和删除方式，并取得授权。</p></article>
-  </section>
-</main>
+      <article class="insight-card">
+        <span>今日审美提示</span><b>上短下长，比单纯追求显瘦更适合你的比例。</b><button data-view="match">看看怎么搭 →</button>
+      </article>
+    </section>
+
+    <section id="view-shop" class="view" data-view-panel="shop">
+      <div class="page-title"><p class="eyebrow">选购决策</p><h1>这件衣服适合我吗？</h1><p>可以上传你看到的商品，也可以从示例合作商品中选择。</p></div>
+
+      <div class="route-grid">
+        <button id="uploadProduct" class="route-card"><span>＋</span><b>上传商品</b><small>商品图 / 尺码表 / 截图</small></button>
+        <button id="browsePartners" class="route-card"><span>选</span><b>浏览示例商品</b><small>体验合作商家入口</small></button>
+      </div>
+      <input id="productFile" type="file" accept="image/*" hidden>
+      <p id="uploadStatus" class="status-line" aria-live="polite"></p>
+
+      <div class="filter-row" role="tablist" aria-label="商品分类">
+        <button class="chip active" data-category="all">全部</button>
+        <button class="chip" data-category="top">上衣</button>
+        <button class="chip" data-category="bottom">裤子</button>
+        <button class="chip" data-category="shoe">鞋子</button>
+      </div>
+      <div id="productList" class="product-list"></div>
+    </section>
+
+    <section id="view-fit" class="view" data-view-panel="fit">
+      <button class="back-button" data-view="shop">← 返回选购</button>
+      <div id="selectedProduct"></div>
+
+      <article class="panel">
+        <div class="panel-title"><div><p class="eyebrow">STEP 1</p><h2>你想穿出什么感觉？</h2></div><span class="real-badge">参与计算</span></div>
+        <div id="fitChoices" class="choice-row">
+          <button data-fit="slim">修身</button><button data-fit="regular" class="active">合体</button><button data-fit="relaxed">微宽松</button><button data-fit="oversized">宽松</button>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-title"><div><p class="eyebrow">STEP 2</p><h2>确认你的数据</h2></div><span class="real-badge">本地计算</span></div>
+        <div class="form-grid compact">
+          <label>身高<input id="fitHeight" type="number" min="130" max="220"><span>cm</span></label>
+          <label>体重<input id="fitWeight" type="number" min="30" max="200"><span>kg</span></label>
+          <label>胸围<input id="fitChest" type="number" min="60" max="180" placeholder="选填"><span>cm</span></label>
+          <label>肩宽<input id="fitShoulder" type="number" min="30" max="70" placeholder="选填"><span>cm</span></label>
+        </div>
+        <p class="helper">胸围和肩宽可不填，但系统会降低结论置信度，不会假装精准。</p>
+      </article>
+
+      <article class="panel size-panel">
+        <div class="panel-title"><div><p class="eyebrow">商品数据</p><h2>商家尺码表</h2></div><span>成衣尺寸 · cm</span></div>
+        <div class="table-wrap"><table><thead><tr><th>尺码</th><th>肩宽</th><th>胸围</th><th>衣长</th></tr></thead><tbody id="fitSizeRows"></tbody></table></div>
+      </article>
+      <p id="fitError" class="error-line"></p>
+      <button id="calculateFit" class="main-button">计算适合程度</button>
+    </section>
+
+    <section id="view-result" class="view" data-view-panel="result">
+      <button class="back-button" data-view="fit">← 修改数据</button>
+      <div class="page-title"><p class="eyebrow">合身分析</p><h1 id="resultTitle">推荐结果</h1><p id="resultSubtitle"></p></div>
+      <article id="resultHero" class="result-hero"></article>
+      <div id="fitDimensions" class="dimension-list"></div>
+      <article class="explain-card"><b>这两个结论不要混在一起</b><div><span>尺码判断</span><p>来自人体数据与尺码表的关系计算。</p></div><div><span>效果图</span><p>只用于颜色、风格和轮廓氛围参考。</p></div></article>
+      <div class="sticky-actions"><button id="generateTryon" class="main-button">生成视觉参考图</button><button id="addToMatch" class="secondary-button">用它搭一整套</button></div>
+    </section>
+
+    <section id="view-tryon" class="view" data-view-panel="tryon">
+      <button class="back-button" data-view="result">← 返回合身结果</button>
+      <div class="page-title"><p class="eyebrow">AI 视觉试穿</p><h1>看看整体感觉</h1><p>本页是异步生成流程 Demo，不调用真实生图服务。</p></div>
+      <div id="tryonCanvas" class="tryon-canvas"><div class="person-shape"><span></span></div><p>等待生成</p></div>
+      <article id="tryonJob" class="job-card"><span class="loader"></span><div><b>尚未提交</b><p>照片不会上传；当前使用本地定时器模拟。</p></div></article>
+      <button id="runTryon" class="main-button">开始生成演示</button>
+      <p class="safety-note">效果图是审美参考，不是精确版型结果，也不参与尺码推荐。</p>
+    </section>
+
+    <section id="view-match" class="view" data-view-panel="match">
+      <div class="page-title"><p class="eyebrow">整套搭配</p><h1>从一件衣服开始</h1><p>选择场景和主单品，生成衣服、裤子、鞋子的组合建议。</p></div>
+      <div class="panel">
+        <h2>今天去哪儿？</h2>
+        <div id="sceneChoices" class="choice-row"><button class="active" data-scene="daily">日常通勤</button><button data-scene="date">约会见面</button><button data-scene="weekend">周末出游</button></div>
+      </div>
+      <div id="matchLook" class="look-board"></div>
+      <button id="remixLook" class="main-button">换一套搭配</button>
+      <article class="reason-card"><p class="eyebrow">为什么这样搭</p><b id="matchReason"></b><p id="matchDetail"></p></article>
+    </section>
+
+    <section id="view-imagine" class="view" data-view-panel="imagine">
+      <div class="page-title"><p class="eyebrow">审美实验室 · 概念体验</p><h1>看看不同可能的自己</h1><p>这部分展示未来方向，目前全部是交互模拟。</p></div>
+      <div class="lab-grid">
+        <button class="lab-card" data-lab="hair"><span>✦</span><b>换发型与发色</b><small>根据脸型与风格找灵感</small></button>
+        <button class="lab-card" data-lab="body"><span>↕</span><b>体态与轮廓情景</b><small>探索不同视觉比例</small></button>
+        <button class="lab-card" data-lab="style"><span>◒</span><b>尝试另一种风格</b><small>从熟悉到新的可能</small></button>
+        <button class="lab-card" data-lab="animal"><span>🐾</span><b>认识我的动物人格</b><small>建立长期审美偏好</small></button>
+      </div>
+      <article id="labStage" class="lab-stage"><div class="animal-avatar large">🦊</div><div><b>选择一个实验方向</b><p>伙伴会把身体条件、目标效果与审美偏好分开解释。</p></div></article>
+      <p class="safety-note">体态变化仅为视觉情景，不预测减重结果，不提供医疗或健身承诺。</p>
+    </section>
+
+    <section id="view-profile" class="view" data-view-panel="profile">
+      <div class="page-title"><p class="eyebrow">我的档案</p><h1>让建议更接近你</h1><p>准确数据优先使用手工测量；照片估算只提供比例参考。</p></div>
+      <form id="profileForm" class="panel">
+        <div class="animal-profile"><div class="animal-avatar">🦊</div><div><b>赤狐型 · 敏锐而松弛</b><p>这是一种交互人格，不是身材判断。</p></div></div>
+        <div class="form-grid">
+          <label>身高<input id="profileHeight" type="number" min="130" max="220" value="175"><span>cm</span></label>
+          <label>体重<input id="profileWeight" type="number" min="30" max="200" value="68"><span>kg</span></label>
+          <label>胸围<input id="profileChest" type="number" min="60" max="180" value="96"><span>cm</span></label>
+          <label>肩宽<input id="profileShoulder" type="number" min="30" max="70" value="44"><span>cm</span></label>
+          <label>腰围<input id="profileWaist" type="number" min="50" max="180" placeholder="选填"><span>cm</span></label>
+          <label>脚长<input id="profileFoot" type="number" min="18" max="35" value="26"><span>cm</span></label>
+        </div>
+        <article class="camera-card">
+          <div><b>正面全身照</b><p>穿贴身衣物、头脚完整入镜。Demo 不运行真实量体模型。</p></div>
+          <div id="cameraPreview" class="camera-preview"><video id="cameraVideo" playsinline muted hidden></video><canvas id="cameraCanvas" hidden></canvas><span id="cameraPlaceholder">照片仅在本机处理</span></div>
+          <div class="inline-actions"><button id="openCamera" type="button" class="secondary-button">打开后置相机</button><button id="capturePhoto" type="button" class="secondary-button" hidden>拍摄</button><label class="secondary-button">从相册选择<input id="bodyPhoto" type="file" accept="image/*" capture="environment" hidden></label></div>
+          <p id="cameraMessage" class="status-line"></p>
+        </article>
+        <button class="main-button">保存身体档案</button>
+      </form>
+    </section>
+  </main>
+
+  <nav class="bottom-nav" aria-label="主要导航">
+    <button class="active" data-view="home"><span>⌂</span>首页</button>
+    <button data-view="shop"><span>衣</span>选购</button>
+    <button data-view="match"><span>搭</span>搭配</button>
+    <button data-view="imagine"><span>✦</span>想象</button>
+    <button data-view="profile"><span>我</span>我的</button>
+  </nav>
+</div>
+
+<dialog id="infoDialog">
+  <button class="dialog-close" aria-label="关闭">×</button>
+  <h2>这一版能做什么？</h2>
+  <ul><li><b>真实交互：</b>本地身体档案、商品选择、尺码关系计算、相机与相册入口。</li><li><b>假数据演示：</b>合作商品、搭配推荐、动物人格和美商实验。</li><li><b>流程模拟：</b>尺码表识别和 AI 试穿，当前不调用模型或云服务。</li></ul>
+  <p>演示数据只保存在当前浏览器，不构成购买、健康或身材预测建议。</p>
+</dialog>
+
+<div id="toast" role="status" aria-live="polite"></div>
 <script src="app.js"></script>
 </body>
 </html>
