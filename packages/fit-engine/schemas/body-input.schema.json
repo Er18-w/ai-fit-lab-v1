@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "body-input.schema.json",
+  "title": "Body input for T-shirt fit",
+  "type": "object",
+  "required": ["height_cm"],
+  "properties": {
+    "height_cm": { "type": "number", "minimum": 100, "maximum": 230 },
+    "chest": { "$ref": "#/$defs/measurement" },
+    "shoulder_reference": {
+      "allOf": [
+        { "$ref": "#/$defs/measurement" },
+        {
+          "type": "object",
+          "required": ["definition"],
+          "properties": {
+            "definition": { "enum": ["garment_comparable", "body_biacromial", "body_visual"] }
+          }
+        }
+      ]
+    }
+  },
+  "$defs": {
+    "measurement": {
+      "type": "object",
+      "required": ["source"],
+      "oneOf": [
+        { "required": ["value_cm"] },
+        { "required": ["min_cm", "max_cm"] }
+      ],
+      "properties": {
+        "value_cm": { "type": "number", "exclusiveMinimum": 0 },
+        "min_cm": { "type": "number", "exclusiveMinimum": 0 },
+        "max_cm": { "type": "number", "exclusiveMinimum": 0 },
+        "source": { "enum": ["manual", "camera_estimate", "merchant_range"] }
+      }
+    }
+  },
+  "additionalProperties": false
+}
