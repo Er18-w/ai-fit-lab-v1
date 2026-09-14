@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "garment-input.schema.json",
+  "title": "T-shirt garment measurement input",
+  "type": "object",
+  "required": ["category", "unit", "measurement_basis", "sizes"],
+  "properties": {
+    "category": { "const": "t_shirt" },
+    "measurement_type": { "enum": ["garment"] },
+    "unit": { "enum": ["cm", "inch"] },
+    "sleeve_type": { "enum": ["set_in", "drop_shoulder", "raglan", "unknown"] },
+    "fabric_stretch": { "enum": ["none", "low", "medium", "high", "unknown"] },
+    "measurement_basis": {
+      "type": "object",
+      "required": ["chest"],
+      "properties": {
+        "chest": { "enum": ["circumference", "half_width"] },
+        "cuff": { "enum": ["circumference", "half_width", "unknown"] },
+        "length_origin": { "enum": ["high_point_shoulder", "back_neck", "unknown"] }
+      },
+      "additionalProperties": false
+    },
+    "sizes": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "$ref": "#/$defs/size" }
+    }
+  },
+  "$defs": {
+    "nullablePositive": { "type": ["number", "null"], "exclusiveMinimum": 0 },
+    "size": {
+      "type": "object",
+      "properties": {
+        "shoulder": { "$ref": "#/$defs/nullablePositive" },
+        "chest": { "$ref": "#/$defs/nullablePositive" },
+        "length": { "$ref": "#/$defs/nullablePositive" },
+        "sleeve_length": { "$ref": "#/$defs/nullablePositive" },
+        "cuff": { "$ref": "#/$defs/nullablePositive" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

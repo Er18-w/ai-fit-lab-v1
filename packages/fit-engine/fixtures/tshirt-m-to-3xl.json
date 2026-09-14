@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "category": "t_shirt",
+  "measurement_type": "garment",
+  "unit": "cm",
+  "sleeve_type": "drop_shoulder",
+  "fabric_stretch": "unknown",
+  "measurement_basis": {
+    "chest": "circumference",
+    "cuff": "circumference",
+    "length_origin": "high_point_shoulder"
+  },
+  "sizes": {
+    "M": { "shoulder": 55, "chest": 107, "length": 68.5, "sleeve_length": 19.5, "cuff": 33 },
+    "L": { "shoulder": 56.5, "chest": 110, "length": 70.5, "sleeve_length": 20, "cuff": 34 },
+    "XL": { "shoulder": 58, "chest": 113, "length": 72.5, "sleeve_length": 20.5, "cuff": 35 },
+    "2XL": { "shoulder": 59.5, "chest": 117, "length": 74.5, "sleeve_length": 21, "cuff": 36 },
+    "3XL": { "shoulder": 61, "chest": 120, "length": 76.5, "sleeve_length": 21.5, "cuff": 37 }
+  }
+}

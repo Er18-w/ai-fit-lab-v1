@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "fit-output.schema.json",
+  "title": "T-shirt fit evaluation output",
+  "type": "object",
+  "required": ["schema_version", "rule_version", "rule_status", "recommendation", "candidates", "warnings"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "rule_version": { "type": "string" },
+    "rule_status": { "enum": ["experimental", "calibrated"] },
+    "category": { "const": "t_shirt" },
+    "preference": { "enum": ["slim", "fitted", "slight_relaxed", "relaxed", "oversized"] },
+    "recommendation": {
+      "type": "object",
+      "required": ["mode", "recommended_size", "candidate_sizes", "reason"],
+      "properties": {
+        "mode": { "enum": ["ranked_recommendation", "candidates_only"] },
+        "recommended_size": { "type": ["string", "null"] },
+        "candidate_sizes": { "type": "array", "items": { "type": "string" } },
+        "reason": { "type": "string" }
+      }
+    },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["size", "score", "conclusions"],
+        "properties": {
+          "size": { "type": "string" },
+          "score": { "type": "number" },
+          "conclusions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["rule_id", "dimension", "status", "confidence", "evidence"],
+              "properties": {
+                "rule_id": { "type": "string" },
+                "dimension": { "enum": ["chest", "shoulder", "length"] },
+                "status": { "enum": ["matches_target", "smaller_than_target", "larger_than_target", "unknown"] },
+                "confidence": { "enum": ["experimental", "none"] },
+                "evidence": { "type": "array", "minItems": 1 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "warnings": { "type": "array" }
+  }
+}

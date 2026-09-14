@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>量体风险 Spike</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main>
+      <h1>量体风险 Spike</h1>
+      <p class="warning"><strong>实验工具：</strong>当前没有接入 MediaPipe。标点与厘米换算只用于验证数据流，不能作为人体肩宽或尺码推荐依据。</p>
+      <section class="controls">
+        <button id="start-camera">启动后置相机</button>
+        <button id="capture" disabled>截取当前帧</button>
+        <label>或上传照片<input id="upload" type="file" accept="image/*" capture="environment" /></label>
+        <label>真实身高（cm，仅作实验标定）<input id="height-cm" type="number" min="100" max="230" value="170" /></label>
+      </section>
+      <div id="status" class="status" role="status"></div>
+      <video id="camera" autoplay playsinline muted></video>
+      <p id="next-point"></p>
+      <canvas id="frame" aria-label="点击标注关键点"></canvas>
+      <section class="controls">
+        <button id="reset-points">重置标点</button>
+        <button id="save-frame">检查并记录本帧</button>
+      </section>
+      <h2>可复现实验输出</h2>
+      <pre id="result">尚未记录帧</pre>
+    </main>
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>
+

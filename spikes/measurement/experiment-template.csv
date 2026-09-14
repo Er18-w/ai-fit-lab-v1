@@ -1,0 +1,2 @@
+participant_id,consent_recorded,device_model,browser,viewport_px,camera_lens,capture_distance_cm,camera_height_cm,front_or_side,repeat_index,known_height_cm,manual_biacromial_width_cm,clothing_description,lighting_description,quality_accepted,rejection_codes,pose_landmark_span_px,experimental_height_scaled_span_cm,config_version,notes
+P001,false,,,,1x,,,,front,1,,,,,,,,,,measurement-spike-0.1.0,

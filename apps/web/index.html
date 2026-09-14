@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f5f1e9">
+  <title>合身研究所 · V1 演示</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<main>
+  <header><div><small>FIT LAB · V1 PROTOTYPE</small><h1>合身研究所</h1></div><button id="reset" class="link">重新开始</button></header>
+  <nav id="steps" aria-label="流程进度"></nav>
+  <aside><b>演示模式</b> 本页面使用本地 Mock 数据，不上传照片，也不提供裁缝级量体结论。</aside>
+
+  <section data-step="1" class="active">
+    <p class="kicker">STEP 01</p><h2>建立身体档案</h2><p class="lead">填写基本信息，再拍一张正面全身照。胸围可选，但会直接影响尺码结论。</p>
+    <form id="profile">
+      <fieldset><legend>常购服装体系</legend><label><input name="system" type="radio" value="男装" checked> 男装</label><label><input name="system" type="radio" value="女装"> 女装</label><label><input name="system" type="radio" value="中性"> 中性</label></fieldset>
+      <div class="grid">
+        <label>身高（必填）<span><input id="height" type="number" min="130" max="220" value="175" required> cm</span></label>
+        <label>体重（必填）<span><input id="weight" type="number" min="30" max="200" value="68" required> kg</span></label>
+        <label>胸围（选填）<span><input id="chest" type="number" min="60" max="180" placeholder="例如 96"> cm</span></label>
+        <label>人工肩峰宽（选填）<span><input id="shoulder" type="number" min="25" max="70" placeholder="例如 44"> cm</span></label>
+      </div>
+      <article class="card">
+        <div class="row"><h3>正面全身照</h3><em id="cameraBadge">尚未检测</em></div>
+        <p class="tip">穿贴身上衣，竖屏使用 1× 主摄，保持头顶和脚底完整入镜。</p>
+        <div id="stage"><video id="video" playsinline muted hidden></video><canvas id="canvas" hidden></canvas><div id="placeholder">正面站立<br><small>照片只在本机处理</small></div></div>
+        <div class="actions"><button id="openCamera" type="button" class="secondary">打开后置摄像头</button><button id="capture" type="button" class="secondary" hidden>拍摄</button><label class="secondary">从相册选择<input id="photo" type="file" accept="image/*" capture="environment" hidden></label></div>
+        <p id="cameraMessage" class="message" aria-live="polite"></p>
+      </article>
+      <article class="card row sensor"><div><h3>手机角度辅助（可选）</h3><p class="tip">失败时可跳过，不影响后续流程。</p><p id="sensorMessage" class="message"></p></div><button id="sensor" type="button" class="secondary">检测角度</button></article>
+      <p id="profileError" class="error"></p><button class="primary">生成演示测量结果</button>
+    </form>
+  </section>
+
+  <section data-step="2">
+    <p class="kicker">STEP 02</p><h2>确认商品尺码表</h2><p class="lead">样例为成人短袖 T 恤成衣尺寸，正式版须由用户确认测量口径与数值。</p>
+    <article class="card summary"><div><small>数据类型</small><b>成衣尺寸 · 完整围度</b></div><div><small>袖型判断</small><b>疑似落肩</b></div></article>
+    <div class="table"><table><thead><tr><th>尺码</th><th>肩宽</th><th>胸围</th><th>衣长</th><th>袖长</th></tr></thead><tbody id="sizes"></tbody></table></div>
+    <p class="tip">单位 cm。M 码肩宽已达 55 cm，因此肩宽差用于描述落肩程度，不直接判定“过大”。</p>
+    <fieldset><legend>希望穿出什么效果？</legend><label><input name="fit" type="radio" value="修身"> 修身</label><label><input name="fit" type="radio" value="合体" checked> 合体</label><label><input name="fit" type="radio" value="微宽松"> 微宽松</label><label><input name="fit" type="radio" value="宽松"> 宽松</label></fieldset>
+    <button id="calculate" class="primary">计算合身关系</button>
+  </section>
+
+  <section data-step="3">
+    <p class="kicker">STEP 03</p><h2>合身结果</h2><p id="resultIntro" class="lead"></p>
+    <article id="recommendation" class="recommendation"></article>
+    <article class="card"><div class="row"><h3>尺寸关系示意带</h3><em>非物理仿真</em></div><div class="figure"><i class="head"></i><i class="body"></i><i class="band shoulder-band"></i><i class="band hem-band"></i></div></article>
+    <div id="dimensions"></div><button id="toTryon" class="primary">继续看视觉试穿</button>
+  </section>
+
+  <section data-step="4">
+    <p class="kicker">STEP 04 · OPTIONAL</p><h2>AI 试穿参考</h2><p class="lead">只表达颜色、风格和大致宽松感，不参与尺码推荐。</p>
+    <div class="tryon"><div class="shirt">T</div><b>→</b><div id="tryonOutput">等待生成</div></div>
+    <article id="job" class="card row"><span class="spinner"></span><div><h3>尚未提交</h3><p class="tip">演示适配器不会调用云服务或上传照片。</p></div></article>
+    <button id="tryon" class="primary">模拟生成试穿图</button><button id="tryonFail" class="link center">演示生成失败状态</button>
+    <article class="card privacy"><h3>照片与隐私</h3><p class="tip">正式接入第三方服务前，需说明上传对象、保存时长和删除方式，并取得授权。</p></article>
+  </section>
+</main>
+<script src="app.js"></script>
+</body>
+</html>
