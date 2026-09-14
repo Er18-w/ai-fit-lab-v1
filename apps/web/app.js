@@ -2,8 +2,8 @@
 
 const products = [
   {
-    id: "tee-sage", name: "鼠尾草绿落肩短袖", category: "top", icon: "👕", color: "#cbd6c4", partner: true,
-    note: "柔和低饱和 · 适合日常", match: 92,
+    id: "tee-sage", name: "白色基础短袖", category: "top", image: "assets/product-tshirt.jpg",
+    note: "V 领 · 常规衣长 · 样例尺码 M–3XL", match: 92, data: "肩宽 55–61 / 胸围 107–120 cm",
     sizes: [
       { size: "M", shoulder: 55, chest: 107, length: 68.5 },
       { size: "L", shoulder: 56.5, chest: 110, length: 70.5 },
@@ -12,11 +12,11 @@ const products = [
       { size: "3XL", shoulder: 61, chest: 120, length: 76.5 }
     ]
   },
-  { id: "shirt-blue", name: "雾蓝牛津纺衬衫", category: "top", icon: "👔", color: "#b9cbd4", partner: true, note: "轮廓清楚 · 通勤友好", match: 88 },
-  { id: "pants-khaki", name: "卡其直筒休闲裤", category: "bottom", icon: "👖", color: "#d2c39e", partner: false, note: "直筒不贴腿 · 平衡上身", match: 90 },
-  { id: "jeans-dark", name: "深靛蓝直筒牛仔裤", category: "bottom", icon: "👖", color: "#7f94a4", partner: true, note: "耐搭配 · 下装有重量", match: 86 },
-  { id: "shoe-cream", name: "米白低帮休闲鞋", category: "shoe", icon: "👟", color: "#e6dfcf", partner: true, note: "脚长 25.5–26.3 cm 可试 42", match: 91 },
-  { id: "shoe-brown", name: "棕色德训鞋", category: "shoe", icon: "👟", color: "#b99b7d", partner: false, note: "暖色呼应 · 前掌常规", match: 84 }
+  { id: "shirt-blue", name: "通勤衬衫", category: "top", image: "assets/product-shirts.jpg", note: "常规领型 · 轮廓清楚", match: 88, data: "示例规格：胸围 104–116 cm" },
+  { id: "pants-khaki", name: "针织与直筒裤组合", category: "bottom", image: "assets/product-flatlay.jpg", note: "上松下直 · 日常层次", match: 90, data: "示例规格：腰围 72–88 cm" },
+  { id: "jeans-dark", name: "蓝色直筒牛仔裤", category: "bottom", image: "assets/product-jeans.jpg", note: "中腰 · 直筒 · 常规裤长", match: 86, data: "示例规格：腰围 70–86 cm" },
+  { id: "shoe-cream", name: "灰色缓震运动鞋", category: "shoe", image: "assets/product-sneaker.jpg", note: "脚长 25.5–26.3 cm 可试 42", match: 91, data: "示例数据：前掌常规 / 鞋楦未知" },
+  { id: "shoe-brown", name: "黑色休闲鞋搭配", category: "shoe", image: "assets/product-flatlay.jpg", note: "深色收尾 · 适合通勤", match: 84, data: "示例数据：尺码信息待补充" }
 ];
 
 const fallbackSizes = products[0].sizes;
@@ -46,11 +46,11 @@ function showView(view) {
 }
 
 function productArt(product) {
-  return `<div class="product-art" style="background:${product.color}">${product.partner ? "<i>合作商品</i>" : ""}<span>${product.icon}</span></div>`;
+  return `<div class="product-art"><img src="${product.image}" alt="${product.name}" loading="lazy"></div>`;
 }
 
 function productTags(product) {
-  return `<div class="tags"><span class="tag">适合度 ${product.match}%</span>${product.partner ? '<span class="tag partner">合作商品</span>' : '<span class="tag">示例商品</span>'}</div>`;
+  return `<div class="tags"><span class="tag">示例匹配 ${product.match}%</span><span class="tag">有规格数据</span></div>`;
 }
 
 function renderProducts(category = "all") {
@@ -58,13 +58,13 @@ function renderProducts(category = "all") {
   $("#productList").innerHTML = shown.map((product) => `
     <button class="product-row" data-product="${product.id}">
       ${productArt(product)}
-      <span class="product-copy"><b>${product.name}</b><p>${product.note}</p>${productTags(product)}</span>
+      <span class="product-copy"><b>${product.name}</b><p>${product.note}</p><small class="data-line">${product.data}</small>${productTags(product)}</span>
     </button>`).join("");
   $$("[data-product]").forEach((button) => button.addEventListener("click", () => selectProduct(button.dataset.product)));
 }
 
 function renderHomeProducts() {
-  $("#homeProducts").innerHTML = products.filter((item) => item.partner).slice(0, 3).map((product) => `
+  $("#homeProducts").innerHTML = products.slice(0, 4).map((product) => `
     <button class="product-mini" data-home-product="${product.id}">${productArt(product)}<div><b>${product.name}</b><small>适合度 ${product.match}%</small></div></button>`).join("");
   $$('[data-home-product]').forEach((button) => button.addEventListener("click", () => selectProduct(button.dataset.homeProduct)));
 }
@@ -218,18 +218,54 @@ function runTryon() {
   }, 900);
 }
 
-const labContent = {
-  hair: ["✂️", "发型与发色灵感", "模拟：比较短层次、自然卷与深茶色。正式版需要人脸与发型参考图生成。"],
-  body: ["↕️", "体态与轮廓情景", "模拟：展示肩背打开、腰线变化等视觉情景，不预测减重后的真实结果。"],
-  style: ["🎨", "陌生风格试验", "模拟：从日常松弛切换到清爽通勤，同时保留你不喜欢紧绷感的偏好。"],
-  animal: ["🦊", "赤狐型 · 敏锐而松弛", "动物人格负责陪伴、表达与审美偏好，不替代身体数据或尺码计算。"]
+const hairReferences = {
+  short: ["自然短发 · 参考分析", "颈肩区域更清楚，适合比较领口、肩线和耳饰；正式功能会把用户本人照片与所选参考一起送入生图模型。"],
+  curly: ["蓬松卷发 · 参考分析", "头部横向量感增加，和窄肩上装搭配时更需要关注肩部轮廓；深色发色对比更集中。"],
+  long: ["长层次发 · 参考分析", "长发形成纵向线条，但会遮挡一部分肩线；试穿判断仍应以人体数据为准。"],
+  red: ["暖红短发 · 参考分析", "暖色把视觉焦点移到面部附近，衣服颜色建议降低饱和度，避免同时出现多个强焦点。"]
 };
 
-function renderLab(type) {
-  $$("[data-lab]").forEach((button) => button.classList.toggle("active", button.dataset.lab === type));
-  const [icon, title, text] = labContent[type];
-  $("#labStage").innerHTML = `<div class="animal-avatar large">${icon}</div><div><b>${title}</b><p>${text}</p><button class="text-button" type="button">生成一组模拟方案 →</button></div>`;
-  $("#labStage button").addEventListener("click", () => showToast("已生成 3 个概念方案（Demo 假数据）"));
+const styleReferences = {
+  clean: ["清爽基础", "适合先验证版型与比例，不依赖复杂配饰。系统可据此提高基础款与低对比配色的权重。"],
+  layer: ["层次休闲", "用针织、牛仔和深色鞋构成三层材质关系，更适合周末或休闲场景。"],
+  smart: ["利落通勤", "优先选择肩线明确、衣长不过长的单品，并把全身主要颜色控制在三种以内。"]
+};
+
+function showReference(type) {
+  $$("[data-reference]").forEach((button) => button.classList.toggle("active", button.dataset.reference === type));
+  $$("[data-reference-panel]").forEach((panel) => panel.classList.toggle("active", panel.dataset.referencePanel === type));
+}
+
+function selectHair(type) {
+  $$("[data-hair]").forEach((button) => button.classList.toggle("active", button.dataset.hair === type));
+  const [title, detail] = hairReferences[type];
+  $("#hairResult").querySelector("b").textContent = title;
+  $("#hairResult").querySelector("p").textContent = detail;
+}
+
+function selectStyle(type) {
+  $$("[data-style]").forEach((button) => button.classList.toggle("active", button.dataset.style === type));
+  const [title, detail] = styleReferences[type];
+  $("#styleResult").querySelector("b").textContent = title;
+  $("#styleResult").querySelector("p").textContent = detail;
+}
+
+function updatePosture() {
+  const shoulder = Number($("#postureShoulder").value);
+  const waist = Number($("#postureWaist").value);
+  const hem = Number($("#postureHem").value);
+  $("#shoulderOutput").textContent = shoulder > 0 ? `+${shoulder}` : shoulder;
+  $("#waistOutput").textContent = waist > 0 ? `+${waist}` : waist;
+  $("#hemOutput").textContent = hem;
+  const diagram = $("#bodyDiagram");
+  diagram.style.setProperty("--shoulder-width", `${116 + shoulder * 5}px`);
+  diagram.style.setProperty("--waist-top", `${158 - waist * 4}px`);
+  diagram.style.setProperty("--hem-wave", `${hem * 2}px`);
+  const posture = shoulder >= 3 ? "肩背打开" : shoulder <= -3 ? "含肩明显" : "自然站姿";
+  const waistText = waist >= 3 ? "提高腰线" : waist <= -3 ? "降低腰线" : "自然腰线";
+  const hemText = hem >= 4 ? "裤脚堆积较多" : hem <= 1 ? "裤脚利落" : "裤脚轻微堆积";
+  $("#postureResult").querySelector("b").textContent = `当前情景：${posture} / ${waistText}`;
+  $("#postureResult").querySelector("p").textContent = `${posture}会改变上半身轮廓；${waistText}影响上下身比例；${hemText}。这些是穿搭与姿态情景，不是身体变化预测。`;
 }
 
 function saveProfile() {
@@ -336,7 +372,7 @@ function bindEvents() {
   $("#productFile").addEventListener("change", (event) => {
     if (!event.target.files[0]) return;
     $("#uploadStatus").textContent = "商品截图已在本地读取。OCR 当前为模拟：已识别为“短袖 T 恤”，请确认示例尺码表。";
-    state.product = { ...products[0], id: "user-upload", name: "我上传的短袖商品", partner: false, note: "本地图片 · 尺码表识别为 Demo 模拟" };
+    state.product = { ...products[0], id: "user-upload", name: "我上传的短袖商品", image: URL.createObjectURL(event.target.files[0]), note: "本地图片 · 尺码表识别为 Demo 模拟" };
     setTimeout(() => showView("fit"), 450);
   });
   $("#browsePartners").addEventListener("click", () => $("#productList").scrollIntoView({ behavior: "smooth" }));
@@ -359,7 +395,11 @@ function bindEvents() {
     renderLook();
   }));
   $("#remixLook").addEventListener("click", () => { state.lookIndex += 1; renderLook(); });
-  $$("[data-lab]").forEach((button) => button.addEventListener("click", () => renderLab(button.dataset.lab)));
+  $$("[data-reference]").forEach((button) => button.addEventListener("click", () => showReference(button.dataset.reference)));
+  $$("[data-hair]").forEach((button) => button.addEventListener("click", () => selectHair(button.dataset.hair)));
+  $$("[data-style]").forEach((button) => button.addEventListener("click", () => selectStyle(button.dataset.style)));
+  ["#postureShoulder", "#postureWaist", "#postureHem"].forEach((selector) => $(selector).addEventListener("input", updatePosture));
+  $("#hairResult button").addEventListener("click", () => showToast("已记录所选参考；正式版将在这里调用人物换发模型。"));
   $("#profileForm").addEventListener("submit", submitProfile);
   $("#openCamera").addEventListener("click", openCamera);
   $("#capturePhoto").addEventListener("click", capturePhoto);

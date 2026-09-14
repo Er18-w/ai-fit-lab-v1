@@ -10,15 +10,15 @@
 <body>
 <div class="app-shell">
   <header class="topbar">
-    <button class="brand" data-view="home" aria-label="返回首页"><span>自如</span><small>和更适合的自己相遇</small></button>
+    <button class="brand" data-view="home" aria-label="返回首页"><span>自如</span><small>AI 合身与选购助手</small></button>
     <button id="demoInfo" class="text-button">演示说明</button>
   </header>
 
   <main>
     <section id="view-home" class="view active" data-view-panel="home">
-      <article class="companion-card">
-        <div class="animal-avatar" aria-hidden="true">🦊</div>
-        <div><p class="eyebrow">你的审美伙伴 · 赤狐型</p><h1>今天想解决哪件事？</h1><p>我记得你的身体数据，也会区分客观合身和主观风格。</p></div>
+      <article class="companion-card core-hero">
+        <div><p class="eyebrow">核心功能</p><h1>先判断合不合身，再看穿上好不好看</h1><p>输入身体数据和商品尺码表，计算适合的尺码、肩线、胸围松量和衣长关系。</p><button class="hero-button" data-action="start-buy">开始选择衣服</button></div>
+        <img src="assets/product-tshirt.jpg" alt="短袖服装平铺参考图">
       </article>
 
       <div class="quick-grid">
@@ -28,8 +28,8 @@
         <button class="feature-card" data-view="profile"><span class="feature-icon">我</span><b>完善身体档案</b><small id="profileCompleteness">当前完整度 70%</small></button>
       </div>
 
-      <div class="section-heading"><div><p class="eyebrow">今日推荐</p><h2>适合你的合作商品</h2></div><button class="text-button" data-view="shop">查看全部</button></div>
-      <p class="disclosure">合作商品会明确标注；推荐优先依据适合程度，不等于广告排序。</p>
+      <div class="section-heading"><div><p class="eyebrow">次要功能</p><h2>你可能会喜欢的单品</h2></div><button class="text-button" data-view="shop">查看全部</button></div>
+      <p class="disclosure">以下是带真实照片的示例单品，不代表合作、广告或真实在售链接。</p>
       <div id="homeProducts" class="product-strip"></div>
 
       <article class="insight-card">
@@ -38,11 +38,11 @@
     </section>
 
     <section id="view-shop" class="view" data-view-panel="shop">
-      <div class="page-title"><p class="eyebrow">选购决策</p><h1>这件衣服适合我吗？</h1><p>可以上传你看到的商品，也可以从示例合作商品中选择。</p></div>
+      <div class="page-title"><p class="eyebrow">核心功能 · 选购决策</p><h1>这件衣服适合我吗？</h1><p>上传你看到的商品，或者先用内置真实照片和样例尺码数据体验。</p></div>
 
       <div class="route-grid">
         <button id="uploadProduct" class="route-card"><span>＋</span><b>上传商品</b><small>商品图 / 尺码表 / 截图</small></button>
-        <button id="browsePartners" class="route-card"><span>选</span><b>浏览示例商品</b><small>体验合作商家入口</small></button>
+        <button id="browsePartners" class="route-card"><span>选</span><b>使用示例商品</b><small>真实照片 + 样例尺码数据</small></button>
       </div>
       <input id="productFile" type="file" accept="image/*" hidden>
       <p id="uploadStatus" class="status-line" aria-live="polite"></p>
@@ -116,21 +116,48 @@
     </section>
 
     <section id="view-imagine" class="view" data-view-panel="imagine">
-      <div class="page-title"><p class="eyebrow">审美实验室 · 概念体验</p><h1>看看不同可能的自己</h1><p>这部分展示未来方向，目前全部是交互模拟。</p></div>
-      <div class="lab-grid">
-        <button class="lab-card" data-lab="hair"><span>✦</span><b>换发型与发色</b><small>根据脸型与风格找灵感</small></button>
-        <button class="lab-card" data-lab="body"><span>↕</span><b>体态与轮廓情景</b><small>探索不同视觉比例</small></button>
-        <button class="lab-card" data-lab="style"><span>◒</span><b>尝试另一种风格</b><small>从熟悉到新的可能</small></button>
-        <button class="lab-card" data-lab="animal"><span>🐾</span><b>认识我的动物人格</b><small>建立长期审美偏好</small></button>
+      <div class="page-title"><p class="eyebrow">形象参考 · 扩展能力</p><h1>发型、发色与体态参考</h1><p>不只放入口：这一版已经加入可选择的参考照片、参数和解释结果。</p></div>
+      <div id="referenceTabs" class="choice-row reference-tabs">
+        <button class="active" data-reference="hair">发型与发色</button><button data-reference="posture">体态情景</button><button data-reference="style">风格参考</button>
       </div>
-      <article id="labStage" class="lab-stage"><div class="animal-avatar large">🦊</div><div><b>选择一个实验方向</b><p>伙伴会把身体条件、目标效果与审美偏好分开解释。</p></div></article>
-      <p class="safety-note">体态变化仅为视觉情景，不预测减重结果，不提供医疗或健身承诺。</p>
+
+      <div class="reference-panel active" data-reference-panel="hair">
+        <div id="hairGallery" class="reference-gallery">
+          <button class="reference-card active" data-hair="short"><img src="assets/hair-short.jpg" alt="自然短发参考"><b>自然短发</b><small>降低头发量感，突出颈肩</small></button>
+          <button class="reference-card" data-hair="curly"><img src="assets/hair-curly.jpg" alt="卷发参考"><b>蓬松卷发</b><small>增加头部轮廓与存在感</small></button>
+          <button class="reference-card" data-hair="long"><img src="assets/hair-long.jpg" alt="长发参考"><b>长层次发</b><small>纵向线条更明显</small></button>
+          <button class="reference-card" data-hair="red"><img src="assets/hair-red.jpg" alt="暖红短发参考"><b>暖红短发</b><small>提高面部附近的色彩焦点</small></button>
+        </div>
+        <article id="hairResult" class="data-result"><b>自然短发 · 参考分析</b><p>颈肩区域更清楚，适合比较领口、肩线和耳饰；正式功能会把用户本人照片与所选参考一起送入生图模型。</p><button class="secondary-button">用我的照片模拟</button></article>
+      </div>
+
+      <div class="reference-panel" data-reference-panel="posture">
+        <article class="posture-tool">
+          <div id="bodyDiagram" class="body-diagram"><i class="diagram-head"></i><i class="diagram-body"></i><i class="shoulder-line"></i><i class="waist-line"></i></div>
+          <div class="slider-list">
+            <label>肩背打开程度 <output id="shoulderOutput">0</output><input id="postureShoulder" type="range" min="-5" max="5" value="0"></label>
+            <label>视觉腰线位置 <output id="waistOutput">0</output><input id="postureWaist" type="range" min="-5" max="5" value="0"></label>
+            <label>裤脚堆积程度 <output id="hemOutput">2</output><input id="postureHem" type="range" min="0" max="5" value="2"></label>
+          </div>
+        </article>
+        <article id="postureResult" class="data-result"><b>当前情景：自然站姿</b><p>拖动参数后，系统会说明视觉变化。它表达穿搭和姿态关系，不预测减肥结果。</p></article>
+      </div>
+
+      <div class="reference-panel" data-reference-panel="style">
+        <div class="style-reference-list">
+          <button class="style-reference active" data-style="clean"><img src="assets/product-tshirt.jpg" alt="清爽基础风参考"><span><b>清爽基础</b><small>低对比、少层次、尺码合体</small></span></button>
+          <button class="style-reference" data-style="layer"><img src="assets/product-flatlay.jpg" alt="层次休闲风参考"><span><b>层次休闲</b><small>牛仔、针织和深色鞋形成层次</small></span></button>
+          <button class="style-reference" data-style="smart"><img src="assets/product-shirts.jpg" alt="利落通勤风参考"><span><b>利落通勤</b><small>轮廓清楚，颜色数量受控</small></span></button>
+        </div>
+        <article id="styleResult" class="data-result"><b>清爽基础</b><p>适合先验证版型与比例，不依赖复杂配饰。系统可据此调整商品推荐权重。</p></article>
+      </div>
+      <p class="safety-note">参考照片来自免费图库，仅用于演示。体态情景不预测减重结果，也不提供医疗或健身承诺。</p>
     </section>
 
     <section id="view-profile" class="view" data-view-panel="profile">
       <div class="page-title"><p class="eyebrow">我的档案</p><h1>让建议更接近你</h1><p>准确数据优先使用手工测量；照片估算只提供比例参考。</p></div>
       <form id="profileForm" class="panel">
-        <div class="animal-profile"><div class="animal-avatar">🦊</div><div><b>赤狐型 · 敏锐而松弛</b><p>这是一种交互人格，不是身材判断。</p></div></div>
+        <div class="profile-summary"><b>当前用于推荐的数据</b><p>身高、体重用于粗筛；手工胸围和肩宽决定合身结论的可信度。</p></div>
         <div class="form-grid">
           <label>身高<input id="profileHeight" type="number" min="130" max="220" value="175"><span>cm</span></label>
           <label>体重<input id="profileWeight" type="number" min="30" max="200" value="68"><span>kg</span></label>
@@ -154,7 +181,7 @@
     <button class="active" data-view="home"><span>⌂</span>首页</button>
     <button data-view="shop"><span>衣</span>选购</button>
     <button data-view="match"><span>搭</span>搭配</button>
-    <button data-view="imagine"><span>✦</span>想象</button>
+    <button data-view="imagine"><span>参</span>参考</button>
     <button data-view="profile"><span>我</span>我的</button>
   </nav>
 </div>
@@ -162,7 +189,7 @@
 <dialog id="infoDialog">
   <button class="dialog-close" aria-label="关闭">×</button>
   <h2>这一版能做什么？</h2>
-  <ul><li><b>真实交互：</b>本地身体档案、商品选择、尺码关系计算、相机与相册入口。</li><li><b>假数据演示：</b>合作商品、搭配推荐、动物人格和美商实验。</li><li><b>流程模拟：</b>尺码表识别和 AI 试穿，当前不调用模型或云服务。</li></ul>
+  <ul><li><b>真实交互：</b>本地身体档案、商品选择、尺码关系计算、相机与相册入口。</li><li><b>带数据演示：</b>真实单品照片、搭配规则、发型参考和体态参数。</li><li><b>流程模拟：</b>尺码表识别和 AI 试穿，当前不调用模型或云服务。</li></ul>
   <p>演示数据只保存在当前浏览器，不构成购买、健康或身材预测建议。</p>
 </dialog>
 
