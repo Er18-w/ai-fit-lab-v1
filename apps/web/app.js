@@ -17,7 +17,7 @@ const fallbackSizes = products[0].sizes;
 const state = {
   view: "home",
   profile: { height: 175, weight: 68, chest: 96, shoulder: 44, waist: null, foot: 26 },
-  product: products[0], fit: "regular", result: null, stream: null, tryonTimer: null,
+  product: products[0], fit: "regular", result: null, stream: null, captureCoach: null, tryonTimer: null,
   closet: [...products], closetCategory: "all",
   board: ["tee-white", "jeans-blue", "shoe-grey"],
   boardPositions: {}, savedOutfits: [], personPhoto: null
@@ -284,14 +284,25 @@ function submitProfile(event) {
 async function openCamera() {
   const message = $("#cameraMessage");
   if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) { message.textContent = "浏览器相机需要 HTTPS；你仍可使用系统相册或相机上传。"; return; }
-  stopCamera(); message.textContent = "正在请求相机权限…";
+  stopCamera(); message.textContent = "正在请求相机和姿态传感器权限…";
   try {
+    if (window.createCaptureCoach) {
+      state.captureCoach = window.createCaptureCoach({ video: $("#cameraVideo"), overlay: $("#coachOverlay"), checks: $("#coachChecks"), instruction: $("#coachInstruction"), badge: $("#cameraModeBadge"), levelBubble: $("#levelBubble"), captureButton: $("#capturePhoto") });
+      state.captureCoach.prepareSensors();
+    }
     state.stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 1920 } } });
-    const video = $("#cameraVideo"); video.srcObject = state.stream; await video.play(); video.hidden = false; $("#cameraPlaceholder").hidden = true; $("#cameraCanvas").hidden = true; $("#capturePhoto").hidden = false; message.textContent = "相机已开启，请保持头顶和脚底完整入镜。";
+    const video = $("#cameraVideo"); video.srcObject = state.stream; await video.play(); video.hidden = false; $("#cameraPlaceholder").hidden = true; $("#cameraCanvas").hidden = true; $("#capturePhoto").hidden = false; $("#capturePhoto").disabled = false; $("#bodyGuide").hidden = false; $("#levelGauge").hidden = false;
+    if (state.captureCoach) {
+      message.textContent = "相机已开启，正在下载端侧识别模型（首次约需数秒）…";
+      try { await state.captureCoach.start(); message.textContent = "按画面提示调整；也可以忽略实验提示直接拍摄。"; }
+      catch { $("#cameraModeBadge").textContent = "普通拍照"; $("#capturePhoto").disabled = false; $("#coachInstruction").hidden = false; $("#coachInstruction").textContent = "识别模型加载失败，请人工确认头脚完整入镜"; message.textContent = "已降级为普通拍照，仍可继续保存照片。"; }
+    } else {
+      $("#cameraModeBadge").textContent = "普通拍照"; $("#capturePhoto").disabled = false; message.textContent = "实时识别模块未就绪，已降级为普通拍照。";
+    }
   } catch (error) { message.textContent = error?.name === "NotAllowedError" ? "未获得相机权限，可改用相册选择。" : "相机不可用或正被其他程序占用。"; }
 }
-function stopCamera() { state.stream?.getTracks().forEach((track) => track.stop()); state.stream = null; }
-function capturePhoto() { const video = $("#cameraVideo"); if (!video.videoWidth) return; const canvas = $("#cameraCanvas"); canvas.width = video.videoWidth; canvas.height = video.videoHeight; canvas.getContext("2d").drawImage(video, 0, 0); canvas.hidden = false; video.hidden = true; $("#capturePhoto").hidden = true; stopCamera(); $("#cameraMessage").textContent = "照片仅保留在当前页面；Demo 未运行人体测量模型。"; }
+function stopCamera() { state.captureCoach?.stop(); state.captureCoach = null; state.stream?.getTracks().forEach((track) => track.stop()); state.stream = null; }
+function capturePhoto() { const video = $("#cameraVideo"); if (!video.videoWidth) return; const result = state.captureCoach?.getAnalysis(); const canvas = $("#cameraCanvas"); canvas.width = video.videoWidth; canvas.height = video.videoHeight; canvas.getContext("2d").drawImage(video, 0, 0); canvas.hidden = false; video.hidden = true; $("#capturePhoto").hidden = true; $("#coachOverlay").hidden = true; $("#bodyGuide").hidden = true; $("#levelGauge").hidden = true; $("#coachInstruction").hidden = true; $("#coachChecks").hidden = true; stopCamera(); $("#cameraModeBadge").textContent = result?.ready ? "采集合格" : "已拍摄"; $("#cameraMessage").textContent = result?.ready ? "标准照片已保留在当前页面，可用于下一步比例估算。" : "照片已保留在当前页面；本次未取得完整实时质量结果。"; }
 function loadPhoto(file, canvasSelector, placeholderSelector, messageSelector) { readImageFile(file, (dataUrl) => { const image = new Image(); image.onload = () => { const canvas = $(canvasSelector), scale = Math.min(1, 1200 / image.naturalWidth); canvas.width = Math.round(image.naturalWidth * scale); canvas.height = Math.round(image.naturalHeight * scale); canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height); canvas.hidden = false; $(placeholderSelector).hidden = true; if (messageSelector) $(messageSelector).textContent = "图片已载入本机内存，刷新页面后清除。"; }; image.src = dataUrl; }); }
 
 let toastTimer;
