@@ -15,7 +15,7 @@ async function requestOrientationPermission() {
 
 function createCaptureCoach({ video, overlay, checks, instruction, badge, levelBubble, captureButton }) {
   let landmarker, active = false, frameId = 0, lastVideoTime = -1, lastRunAt = 0;
-  let previousPose = null, stableFrames = 0, orientationPermission = "unknown", orientation = null, analysis = null;
+  let previousPose = null, stableFrames = 0, centerMissFrames = 0, lastCenterPass = false, orientationPermission = "unknown", orientation = null, analysis = null;
   const orientationHandler = (event) => { orientation = { beta: event.beta, gamma: event.gamma }; };
 
   async function prepareSensors() {
@@ -66,7 +66,10 @@ function createCaptureCoach({ video, overlay, checks, instruction, badge, levelB
     const minX = Math.min(...xs), maxX = Math.max(...xs), centerX = (minX + maxX) / 2;
     const bodyRatio = footY - headY;
     const distance = bodyRatio >= .58 && bodyRatio <= .91;
-    const center = Math.abs(centerX - .5) <= .085;
+    const centerOffset = Math.abs(centerX - .5);
+    if (centerOffset <= .14) { lastCenterPass = true; centerMissFrames = 0; }
+    else if (centerOffset > .20) { centerMissFrames += 1; if (centerMissFrames >= 6) lastCenterPass = false; }
+    const center = lastCenterPass;
     const frontal = visible(points[11]) && visible(points[12]) && visible(points[23]) && visible(points[24]) && Math.abs((points[11].z || 0) - (points[12].z || 0)) <= .13 && Math.abs((points[23].z || 0) - (points[24].z || 0)) <= .16;
     const tracked = [0,11,12,23,24,27,28].filter((i) => visible(points[i]));
     let movement = 1;
@@ -121,8 +124,16 @@ function createCaptureCoach({ video, overlay, checks, instruction, badge, levelB
   }
 
   async function start() { active = true; checks.hidden = false; overlay.hidden = false; instruction.hidden = false; await loadModel(); badge.textContent = "实时识别"; frameId = requestAnimationFrame(loop); }
-  function stop() { active = false; cancelAnimationFrame(frameId); previousPose = null; stableFrames = 0; window.removeEventListener("deviceorientation", orientationHandler, true); landmarker?.close?.(); landmarker = null; }
-  return { prepareSensors, start, stop, getAnalysis: () => analysis };
+  async function analyzeStill(source) {
+    if (!landmarker) await loadModel();
+    await landmarker.setOptions({ runningMode: "IMAGE" });
+    const result = landmarker.detect(source);
+    const assessed = result.landmarks?.[0] ? assessPose(result.landmarks[0]) : { detected: false, device: { pass: true, available: false }, instruction: "没有识别到完整人体", ready: false };
+    analysis = assessed;
+    return assessed;
+  }
+  function stop() { active = false; cancelAnimationFrame(frameId); previousPose = null; stableFrames = 0; centerMissFrames = 0; lastCenterPass = false; window.removeEventListener("deviceorientation", orientationHandler, true); landmarker?.close?.(); landmarker = null; }
+  return { prepareSensors, start, analyzeStill, stop, getAnalysis: () => analysis };
 }
 
 window.createCaptureCoach = createCaptureCoach;

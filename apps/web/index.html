@@ -24,6 +24,11 @@
         <div id="agentReply" class="agent-reply" hidden></div>
       </article>
 
+      <article id="homeIdentityCard" class="identity-card empty">
+        <div class="identity-visual"><img id="homeAvatarImage" alt="我的二维基础形象" hidden><span id="homeAvatarPlaceholder">我的二维形象</span></div>
+        <div><p class="eyebrow">我的外形数据</p><h2 id="homeIdentityTitle">还没有建立外形档案</h2><p id="homeIdentityText">拍摄一张标准正面全身照，建立身体比例和后续换衣服使用的基础形象。</p><button id="homeProfileAction" class="secondary-button" data-view="profile">开始建立</button></div>
+      </article>
+
       <div class="quick-grid home-actions">
         <button class="feature-card primary-feature" data-view="wardrobe"><span class="feature-icon">衣</span><b>打开我的衣橱</b><small>录入、整理和组合已有衣物</small></button>
         <button class="feature-card" data-view="tryon"><span class="feature-icon">试</span><b>看看上身效果</b><small>按次生成 · 当前为流程模拟</small></button>
@@ -119,8 +124,43 @@
     </section>
 
     <section id="view-profile" class="view" data-view-panel="profile">
-      <div class="page-title"><p class="eyebrow">共享数据底座</p><h1>我的外形档案</h1><p>不创建三维数字人；保存标准照片、身体数据、偏好和后续反馈。</p></div>
-      <form id="profileForm" class="panel"><div class="profile-summary"><b>当前用于推荐的数据</b><p>准确数据优先使用手工测量；照片估算只提供比例参考。</p></div><div class="form-grid"><label>身高<input id="profileHeight" type="number" min="130" max="220" value="175"><span>cm</span></label><label>体重<input id="profileWeight" type="number" min="30" max="200" value="68"><span>kg</span></label><label>胸围<input id="profileChest" type="number" min="60" max="180" value="96"><span>cm</span></label><label>肩宽<input id="profileShoulder" type="number" min="30" max="70" value="44"><span>cm</span></label><label>腰围<input id="profileWaist" type="number" min="50" max="180" placeholder="选填"><span>cm</span></label><label>脚长<input id="profileFoot" type="number" min="18" max="35" value="26"><span>cm</span></label></div><article class="camera-card"><div class="panel-title"><div><b>本人标准照片</b><p>竖屏、贴身衣物、头脚完整入镜；最好由他人持机拍摄。</p></div><span id="cameraModeBadge" class="camera-mode-badge">未启动</span></div><div id="cameraPreview" class="camera-preview"><video id="cameraVideo" playsinline muted hidden></video><canvas id="cameraCanvas" hidden></canvas><canvas id="coachOverlay" class="coach-overlay" hidden></canvas><div id="bodyGuide" class="body-guide" hidden aria-hidden="true"><i class="guide-head"></i><i class="guide-body"></i></div><div id="levelGauge" class="level-gauge" hidden aria-label="手机水平状态"><i id="levelBubble"></i></div><div id="coachInstruction" class="coach-instruction" hidden>正在准备识别…</div><span id="cameraPlaceholder">照片仅在本机处理</span></div><div id="coachChecks" class="coach-checks" hidden aria-live="polite"><span data-check="device">手机姿态</span><span data-check="fullBody">完整入镜</span><span data-check="distance">拍摄距离</span><span data-check="center">人物居中</span><span data-check="frontal">正面站立</span><span data-check="stable">保持稳定</span></div><div class="inline-actions"><button id="openCamera" type="button" class="secondary-button">打开实时拍摄</button><button id="capturePhoto" type="button" class="secondary-button" hidden disabled>拍摄</button><label class="secondary-button">从相册选择<input id="bodyPhoto" type="file" accept="image/*" capture="environment" hidden></label></div><p id="cameraMessage" class="status-line">照片只用于当前页面；相机打开后会在设备端运行人体关键点识别。</p><p class="capture-disclosure">实验功能：视觉提示不等于真实测距，也不能代替手工肩宽、胸围等数据。</p></article><button class="main-button">保存外形档案</button></form>
+      <div class="page-title"><p class="eyebrow">共享数据底座</p><h1>我的外形档案</h1><p>原始照片负责比例分析，二维基础形象负责展示和换衣服；两者分开保存。</p></div>
+
+      <section id="profileOverview" class="profile-step active">
+        <article class="profile-identity-card">
+          <div class="profile-avatar"><img id="profileAvatarImage" alt="我的二维基础形象" hidden><span id="profileAvatarPlaceholder">尚未创建<br>二维形象</span></div>
+          <div><p class="eyebrow">我的基础形象</p><h2 id="profileOverviewTitle">从一张规范照片开始</h2><p id="profileOverviewText">完成后会得到身体比例档案，并可导入 Codex 生成的二维形象。</p></div>
+        </article>
+        <article class="profile-group"><div class="panel-title"><div><p class="eyebrow">基本资料</p><h2>用于比例与尺码判断</h2></div><button id="editProfile" type="button" class="text-button">编辑</button></div><div id="profileSummaryGrid" class="summary-grid"></div></article>
+        <article class="profile-group"><p class="eyebrow">身体档案</p><h2 id="bodyProfileState">还没有照片分析</h2><p id="bodyProfileHint">正面照只估算可见比例，胸围、腰围和臀围仍以手工测量为准。</p><button id="createBodyProfile" type="button" class="main-button">拍照建立身体档案</button></article>
+      </section>
+
+      <form id="profileForm" class="profile-step panel">
+        <button type="button" class="back-button" data-profile-step="overview">← 返回档案</button>
+        <div class="profile-summary"><b>先填写必要信息</b><p>身高和体重用于解释照片比例；进阶数据可以不填。</p></div>
+        <div class="form-grid"><label>身高<input id="profileHeight" type="number" min="130" max="220" value="175" required><span>cm</span></label><label>体重<input id="profileWeight" type="number" min="30" max="200" value="68" required><span>kg</span></label><label>年龄<input id="profileAge" type="number" min="12" max="100" placeholder="选填"><span>岁</span></label><label>常购体系<select id="profileSystem"><option value="unisex">中性款</option><option value="mens">男装</option><option value="womens">女装</option></select></label></div>
+        <details class="advanced-measures"><summary>进阶身体数据（选填）</summary><p>可以跳过，拍照后会给出比例估算；围度无法仅靠正面照片可靠测出。</p><div class="form-grid"><label>肩宽<input id="profileShoulder" type="number" min="30" max="70" placeholder="选填"><span>cm</span></label><label>胸围<input id="profileChest" type="number" min="60" max="180" placeholder="选填"><span>cm</span></label><label>腰围<input id="profileWaist" type="number" min="50" max="180" placeholder="选填"><span>cm</span></label><label>臀围<input id="profileHip" type="number" min="60" max="190" placeholder="选填"><span>cm</span></label><label>臂长<input id="profileArm" type="number" min="35" max="90" placeholder="选填"><span>cm</span></label><label>腿内长<input id="profileInseam" type="number" min="45" max="120" placeholder="选填"><span>cm</span></label><label>脚长<input id="profileFoot" type="number" min="18" max="35" placeholder="选填"><span>cm</span></label><label>前掌宽<input id="profileForefoot" type="number" min="6" max="15" step="0.1" placeholder="选填"><span>cm</span></label></div></details>
+        <button class="main-button">保存并继续拍照</button>
+      </form>
+
+      <section id="profileGuide" class="profile-step">
+        <button type="button" class="back-button" data-profile-step="setup">← 返回填写资料</button>
+        <article class="panel capture-guide"><p class="eyebrow">拍摄前准备</p><h2>这张照片只建立正面身形比例</h2><ul><li>穿修身短袖、背心或其他贴身上衣</li><li>穿修身短裤或轮廓清楚的长裤</li><li>头顶和双脚完整入镜，双臂自然放下</li><li>竖屏拍摄，镜头尽量与身体中部同高</li><li>最好请另一人持机，距离约 2–3 米</li></ul><p class="safety-note">不会在这一步分析脸型、皮肤或发型；这些以后需要单独拍摄。</p></article>
+        <button id="startCapture" type="button" class="main-button">我准备好了，进入相机</button>
+      </section>
+
+      <section id="profileCapture" class="profile-step">
+        <button type="button" class="back-button" data-profile-step="guide">← 返回拍摄说明</button>
+        <article class="camera-card panel"><div class="panel-title"><div><b>正面全身拍摄</b><p>提示是辅助，不需要卡到完全居中才能拍。</p></div><span id="cameraModeBadge" class="camera-mode-badge">未启动</span></div><div id="cameraPreview" class="camera-preview"><video id="cameraVideo" playsinline muted hidden></video><canvas id="cameraCanvas" hidden></canvas><canvas id="coachOverlay" class="coach-overlay" hidden></canvas><div id="bodyGuide" class="body-guide" hidden aria-hidden="true"><i class="guide-head"></i><i class="guide-body"></i></div><div id="levelGauge" class="level-gauge" hidden aria-label="手机水平状态"><i id="levelBubble"></i></div><div id="coachInstruction" class="coach-instruction" hidden>正在准备识别…</div><span id="cameraPlaceholder">点击下方按钮打开相机</span></div><div id="coachChecks" class="coach-checks" hidden aria-live="polite"><span data-check="device">手机姿态</span><span data-check="fullBody">完整入镜</span><span data-check="distance">拍摄距离</span><span data-check="center">人物居中</span><span data-check="frontal">正面站立</span><span data-check="stable">保持稳定</span></div><div class="inline-actions"><button id="openCamera" type="button" class="secondary-button">打开实时拍摄</button><button id="capturePhoto" type="button" class="secondary-button" hidden disabled>拍摄</button><label class="secondary-button">从相册选择<input id="bodyPhoto" type="file" accept="image/*" capture="environment" hidden></label></div><p id="cameraMessage" class="status-line">照片只保存在当前浏览器；视觉提示不是苹果 LiDAR 测距。</p></article>
+      </section>
+
+      <section id="profileAnalysis" class="profile-step">
+        <button type="button" class="back-button" data-profile-step="capture">← 重拍</button>
+        <article class="analysis-hero"><img id="analysisPhoto" alt="用于身体比例分析的原始照片"><div><p class="eyebrow">正面身形档案</p><h2>已建立基础比例</h2><p>所有结果来自单张照片，只作为穿衣轮廓参考。</p></div></article>
+        <div id="bodyMetrics" class="metric-grid"></div>
+        <article class="profile-group"><p class="eyebrow">二维基础形象</p><h2>生成白 T 恤＋牛仔裤的标准形象</h2><p>当前比赛 Demo 先由 Codex 人工生成：下载原图发给我，生成后再导回。原图用于测量，生成图只用于展示和换衣服。</p><div class="board-actions"><button id="downloadBodyPhoto" type="button" class="secondary-button">下载原图</button><label class="secondary-button">导入生成图<input id="avatarFile" type="file" accept="image/*" hidden></label></div></article>
+        <button id="finishProfile" type="button" class="main-button">保存并回到我的档案</button>
+      </section>
     </section>
   </main>
 

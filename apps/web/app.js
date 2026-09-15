@@ -16,11 +16,11 @@ const products = [
 const fallbackSizes = products[0].sizes;
 const state = {
   view: "home",
-  profile: { height: 175, weight: 68, chest: 96, shoulder: 44, waist: null, foot: 26 },
+  profile: { version: 2, height: 175, weight: 68, age: null, system: "unisex", chest: null, shoulder: null, waist: null, hip: null, arm: null, inseam: null, foot: null, forefoot: null, createdAt: null },
   product: products[0], fit: "regular", result: null, stream: null, captureCoach: null, tryonTimer: null,
   closet: [...products], closetCategory: "all",
   board: ["tee-white", "jeans-blue", "shoe-grey"],
-  boardPositions: {}, savedOutfits: [], personPhoto: null
+  boardPositions: {}, savedOutfits: [], personPhoto: null, basePhoto: null, avatarPhoto: null, bodyAnalysis: null
 };
 
 const $ = (selector, root = document) => root.querySelector(selector);
@@ -33,7 +33,8 @@ function showView(view) {
   $$('.bottom-nav [data-view]').forEach((button) => button.classList.toggle("active", button.dataset.view === view));
   if (view === "fit") renderSelectedProduct();
   if (view === "wardrobe") { renderWardrobe(); renderBoard(); }
-  if (view === "tryon") updateTryonSummary();
+  if (view === "tryon") { updateTryonSummary(); useSavedIdentityForTryon(); }
+  if (view === "profile") { renderProfileOverview(); showProfileStep("overview"); }
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -211,6 +212,15 @@ function updateTryonSummary() {
   $("#tryonOutfitCount").textContent = count ? `当前已选 ${count} 件衣物` : "尚未选择衣物";
 }
 
+function useSavedIdentityForTryon() {
+  const image = state.avatarPhoto || state.basePhoto;
+  if (!image || state.personPhoto) return;
+  state.personPhoto = image;
+  $("#selectPersonPhoto").querySelector("span").textContent = "✓";
+  $("#selectPersonPhoto").querySelector("small").textContent = state.avatarPhoto ? "已使用我的二维基础形象" : "已使用我的标准全身照";
+  $("#tryonCanvas").innerHTML = `<img class="tryon-person-photo" src="${image}" alt="我的基础形象"><p>已从外形档案载入</p>`;
+}
+
 function loadPersonPhoto(file) {
   readImageFile(file, (image) => {
     state.personPhoto = image;
@@ -267,18 +277,92 @@ function updatePosture() {
 }
 
 function saveProfile() {
-  try { localStorage.setItem("ziru-demo-profile", JSON.stringify(state.profile)); } catch {}
+  try {
+    localStorage.setItem("ziru-demo-profile", JSON.stringify(state.profile));
+    localStorage.setItem("ziru-demo-body-analysis", JSON.stringify(state.bodyAnalysis));
+    if (state.basePhoto) localStorage.setItem("ziru-demo-base-photo", state.basePhoto);
+    if (state.avatarPhoto) localStorage.setItem("ziru-demo-avatar-photo", state.avatarPhoto);
+  } catch { showToast("本机存储空间不足，照片只保留到本次页面关闭"); }
 }
 function loadProfile() {
-  try { const saved = JSON.parse(localStorage.getItem("ziru-demo-profile")); if (saved && typeof saved === "object") state.profile = { ...state.profile, ...saved }; const outfits = JSON.parse(localStorage.getItem("ziru-demo-outfits")); if (Array.isArray(outfits)) state.savedOutfits = outfits; } catch {}
-  const mapping = { Height: "height", Weight: "weight", Chest: "chest", Shoulder: "shoulder", Waist: "waist", Foot: "foot" };
+  try {
+    const saved = JSON.parse(localStorage.getItem("ziru-demo-profile"));
+    if (saved && typeof saved === "object") {
+      state.profile = saved.version === 2 ? { ...state.profile, ...saved } : { ...state.profile, height: saved.height || state.profile.height, weight: saved.weight || state.profile.weight };
+    }
+    const outfits = JSON.parse(localStorage.getItem("ziru-demo-outfits")); if (Array.isArray(outfits)) state.savedOutfits = outfits;
+    state.bodyAnalysis = JSON.parse(localStorage.getItem("ziru-demo-body-analysis")) || null;
+    state.basePhoto = localStorage.getItem("ziru-demo-base-photo"); state.avatarPhoto = localStorage.getItem("ziru-demo-avatar-photo");
+  } catch {}
+  const mapping = { Height: "height", Weight: "weight", Age: "age", Chest: "chest", Shoulder: "shoulder", Waist: "waist", Hip: "hip", Arm: "arm", Inseam: "inseam", Foot: "foot", Forefoot: "forefoot" };
   Object.entries(mapping).forEach(([suffix, key]) => { $("#profile" + suffix).value = state.profile[key] || ""; });
-  renderSavedOutfits();
+  $("#profileSystem").value = state.profile.system || "unisex";
+  renderSavedOutfits(); renderProfileOverview();
 }
 function submitProfile(event) {
   event.preventDefault(); const field = (name) => Number($("#profile" + name).value) || null;
-  state.profile = { height: field("Height"), weight: field("Weight"), chest: field("Chest"), shoulder: field("Shoulder"), waist: field("Waist"), foot: field("Foot") };
-  saveProfile(); showToast("外形档案已保存在当前浏览器"); showView("home");
+  state.profile = { version: 2, height: field("Height"), weight: field("Weight"), age: field("Age"), system: $("#profileSystem").value, chest: field("Chest"), shoulder: field("Shoulder"), waist: field("Waist"), hip: field("Hip"), arm: field("Arm"), inseam: field("Inseam"), foot: field("Foot"), forefoot: field("Forefoot"), createdAt: state.profile.createdAt || new Date().toISOString() };
+  saveProfile(); renderProfileOverview(); showProfileStep("guide");
+}
+
+function showProfileStep(step) {
+  const ids = { overview: "profileOverview", setup: "profileForm", guide: "profileGuide", capture: "profileCapture", analysis: "profileAnalysis" };
+  $$(".profile-step").forEach((panel) => panel.classList.toggle("active", panel.id === ids[step]));
+  if (step !== "capture") stopCamera();
+  if (step === "capture") {
+    $("#cameraVideo").hidden = true; $("#cameraCanvas").hidden = true; $("#coachOverlay").hidden = true; $("#bodyGuide").hidden = true; $("#levelGauge").hidden = true; $("#coachInstruction").hidden = true; $("#coachChecks").hidden = true; $("#capturePhoto").hidden = true; $("#cameraPlaceholder").hidden = false; $("#cameraModeBadge").textContent = "未启动"; $("#cameraMessage").textContent = "照片只保存在当前浏览器；视觉提示不是苹果 LiDAR 测距。";
+  }
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function profileSystemLabel(value) { return value === "mens" ? "男装" : value === "womens" ? "女装" : "中性款"; }
+function renderProfileOverview() {
+  const p = state.profile, image = state.avatarPhoto || state.basePhoto;
+  $("#profileSummaryGrid").innerHTML = [["身高", p.height ? `${p.height} cm` : "未填写"], ["体重", p.weight ? `${p.weight} kg` : "未填写"], ["常购体系", profileSystemLabel(p.system)], ["进阶数据", [p.shoulder,p.chest,p.waist,p.hip,p.arm,p.inseam,p.foot,p.forefoot].filter(Boolean).length ? "已补充" : "均为选填"]].map(([key,value]) => `<div><small>${key}</small><b>${value}</b></div>`).join("");
+  $("#bodyProfileState").textContent = state.bodyAnalysis ? `${state.bodyAnalysis.headRatio} · 腿部约占 ${state.bodyAnalysis.legRatio}` : "还没有照片分析";
+  $("#bodyProfileHint").textContent = state.bodyAnalysis ? `拍摄质量：${state.bodyAnalysis.quality}。原图用于比例判断，生成图不参与测量。` : "正面照只估算可见比例，胸围、腰围和臀围仍以手工测量为准。";
+  $("#createBodyProfile").textContent = state.bodyAnalysis ? "重新拍摄并更新" : "拍照建立身体档案";
+  [["#profileAvatarImage", "#profileAvatarPlaceholder"], ["#homeAvatarImage", "#homeAvatarPlaceholder"]].forEach(([imageId, placeholderId]) => { const imageNode = $(imageId); imageNode.hidden = !image; $(placeholderId).hidden = Boolean(image); if (image) imageNode.src = image; });
+  $("#profileOverviewTitle").textContent = state.avatarPhoto ? "二维基础形象已导入" : state.basePhoto ? "标准照片已保存，待生成二维形象" : "从一张规范照片开始";
+  $("#profileOverviewText").textContent = state.avatarPhoto ? "这张形象用于首页展示和后续换衣服；测量仍使用原始照片。" : state.basePhoto ? "下载原图交给 Codex 处理，再把生成图导回即可。" : "完成后会得到身体比例档案，并可导入 Codex 生成的二维形象。";
+  $("#homeIdentityCard").classList.toggle("empty", !image);
+  $("#homeIdentityTitle").textContent = state.avatarPhoto ? "我的二维基础形象" : state.basePhoto ? "基础照片已建立" : "还没有建立外形档案";
+  $("#homeIdentityText").textContent = state.bodyAnalysis ? `${p.height || "—"} cm · ${state.bodyAnalysis.headRatio} · 下半身约 ${state.bodyAnalysis.legRatio}` : "拍摄一张标准正面全身照，建立身体比例和后续换衣服使用的基础形象。";
+  $("#homeProfileAction").textContent = image ? "查看档案" : "开始建立";
+}
+
+function compactCanvasData(canvas) {
+  const width = Math.min(720, canvas.width), scale = width / canvas.width, height = Math.round(canvas.height * scale);
+  const output = document.createElement("canvas"); output.width = width; output.height = height; output.getContext("2d").drawImage(canvas, 0, 0, width, height);
+  return output.toDataURL("image/jpeg", .82);
+}
+
+function buildBodyAnalysis(result, width, height) {
+  if (!result?.detected || !result.points) return { headRatio: "未识别", shoulderRatio: "未识别", upperRatio: "未识别", legRatio: "未识别", shoulderSlope: "未识别", quality: "需要重拍", confidence: "低" };
+  const p = result.points, bodyPx = Math.max(1, result.bodyRatio * height), shoulderMidY = (p[11].y + p[12].y) / 2, hipMidY = (p[23].y + p[24].y) / 2;
+  const headPx = Math.max(bodyPx * .105, (shoulderMidY - result.headY) * height * .88);
+  const shoulderPx = Math.abs(p[11].x - p[12].x) * width;
+  const headCount = Math.max(5.5, Math.min(9, bodyPx / headPx));
+  const upper = Math.max(0, Math.min(1, (hipMidY - result.headY) * height / bodyPx));
+  const leg = Math.max(0, Math.min(1, (result.footY - hipMidY) * height / bodyPx));
+  const slope = Math.abs(Math.atan2((p[12].y - p[11].y) * height, (p[12].x - p[11].x) * width) * 180 / Math.PI);
+  return { headRatio: `约 ${headCount.toFixed(1)} 头身`, shoulderRatio: `身高画面的 ${(shoulderPx / bodyPx * 100).toFixed(1)}%`, upperRatio: `${(upper * 100).toFixed(0)}%`, legRatio: `${(leg * 100).toFixed(0)}%`, shoulderSlope: slope < 3 ? "基本水平" : slope < 7 ? "轻微高低差" : "建议复核站姿", quality: result.ready ? "标准" : result.fullBody && result.distance ? "可用，建议复核" : "条件不足", confidence: result.fullBody && result.distance ? "中" : "低" };
+}
+
+function renderBodyAnalysis() {
+  const a = state.bodyAnalysis;
+  $("#bodyMetrics").innerHTML = [["头身比例",a.headRatio],["视觉肩宽",a.shoulderRatio],["头顶至髋部",a.upperRatio],["髋部至脚底",a.legRatio],["肩线状态",a.shoulderSlope],["结果可信度",a.confidence]].map(([key,value]) => `<article><small>${key}</small><b>${value}</b></article>`).join("");
+  $("#analysisPhoto").src = state.basePhoto;
+}
+
+function completeBodyCapture(canvas, result) {
+  state.basePhoto = compactCanvasData(canvas); state.bodyAnalysis = buildBodyAnalysis(result, canvas.width, canvas.height);
+  if (!state.profile.createdAt) state.profile.createdAt = new Date().toISOString();
+  saveProfile(); renderBodyAnalysis(); renderProfileOverview(); showProfileStep("analysis");
+}
+
+function makeCaptureCoach() {
+  return window.createCaptureCoach?.({ video: $("#cameraVideo"), overlay: $("#coachOverlay"), checks: $("#coachChecks"), instruction: $("#coachInstruction"), badge: $("#cameraModeBadge"), levelBubble: $("#levelBubble"), captureButton: $("#capturePhoto") }) || null;
 }
 
 async function openCamera() {
@@ -287,7 +371,7 @@ async function openCamera() {
   stopCamera(); message.textContent = "正在请求相机和姿态传感器权限…";
   try {
     if (window.createCaptureCoach) {
-      state.captureCoach = window.createCaptureCoach({ video: $("#cameraVideo"), overlay: $("#coachOverlay"), checks: $("#coachChecks"), instruction: $("#coachInstruction"), badge: $("#cameraModeBadge"), levelBubble: $("#levelBubble"), captureButton: $("#capturePhoto") });
+      state.captureCoach = makeCaptureCoach();
       state.captureCoach.prepareSensors();
     }
     state.stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 1920 } } });
@@ -302,8 +386,32 @@ async function openCamera() {
   } catch (error) { message.textContent = error?.name === "NotAllowedError" ? "未获得相机权限，可改用相册选择。" : "相机不可用或正被其他程序占用。"; }
 }
 function stopCamera() { state.captureCoach?.stop(); state.captureCoach = null; state.stream?.getTracks().forEach((track) => track.stop()); state.stream = null; }
-function capturePhoto() { const video = $("#cameraVideo"); if (!video.videoWidth) return; const result = state.captureCoach?.getAnalysis(); const canvas = $("#cameraCanvas"); canvas.width = video.videoWidth; canvas.height = video.videoHeight; canvas.getContext("2d").drawImage(video, 0, 0); canvas.hidden = false; video.hidden = true; $("#capturePhoto").hidden = true; $("#coachOverlay").hidden = true; $("#bodyGuide").hidden = true; $("#levelGauge").hidden = true; $("#coachInstruction").hidden = true; $("#coachChecks").hidden = true; stopCamera(); $("#cameraModeBadge").textContent = result?.ready ? "采集合格" : "已拍摄"; $("#cameraMessage").textContent = result?.ready ? "标准照片已保留在当前页面，可用于下一步比例估算。" : "照片已保留在当前页面；本次未取得完整实时质量结果。"; }
+function capturePhoto() { const video = $("#cameraVideo"); if (!video.videoWidth) return; const result = state.captureCoach?.getAnalysis(); const canvas = $("#cameraCanvas"); canvas.width = video.videoWidth; canvas.height = video.videoHeight; canvas.getContext("2d").drawImage(video, 0, 0); stopCamera(); completeBodyCapture(canvas, result); }
 function loadPhoto(file, canvasSelector, placeholderSelector, messageSelector) { readImageFile(file, (dataUrl) => { const image = new Image(); image.onload = () => { const canvas = $(canvasSelector), scale = Math.min(1, 1200 / image.naturalWidth); canvas.width = Math.round(image.naturalWidth * scale); canvas.height = Math.round(image.naturalHeight * scale); canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height); canvas.hidden = false; $(placeholderSelector).hidden = true; if (messageSelector) $(messageSelector).textContent = "图片已载入本机内存，刷新页面后清除。"; }; image.src = dataUrl; }); }
+
+function loadBodyPhoto(file) {
+  readImageFile(file, (dataUrl) => {
+    const image = new Image();
+    image.onload = async () => {
+      const canvas = $("#cameraCanvas"), scale = Math.min(1, 1200 / image.naturalWidth); canvas.width = Math.round(image.naturalWidth * scale); canvas.height = Math.round(image.naturalHeight * scale); canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
+      $("#cameraMessage").textContent = "正在设备端分析照片…";
+      let result = null;
+      try { state.captureCoach = makeCaptureCoach(); result = await state.captureCoach?.analyzeStill(canvas); }
+      catch { showToast("人体模型未能完成分析，照片仍会保存"); }
+      stopCamera(); completeBodyCapture(canvas, result);
+    };
+    image.src = dataUrl;
+  });
+}
+
+function downloadBodyPhoto() {
+  if (!state.basePhoto) return showToast("请先拍摄标准全身照");
+  const link = document.createElement("a"); link.href = state.basePhoto; link.download = `自如-二维形象原图-${new Date().toISOString().slice(0,10)}.jpg`; link.click();
+}
+
+function importAvatar(file) {
+  readImageFile(file, (image) => { state.avatarPhoto = image; saveProfile(); renderProfileOverview(); $("#analysisPhoto").src = image; showToast("二维基础形象已导入并显示到首页"); });
+}
 
 let toastTimer;
 function showToast(message) { const toast = $("#toast"); toast.textContent = message; toast.classList.add("show"); clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove("show"), 2600); }
@@ -324,7 +432,8 @@ function bindEvents() {
   $("#selectPersonPhoto").addEventListener("click", () => $("#personPhoto").click()); $("#personPhoto").addEventListener("change", (event) => loadPersonPhoto(event.target.files[0])); $("#runTryon").addEventListener("click", runTryon);
   $$('[data-reference]').forEach((button) => button.addEventListener("click", () => showReference(button.dataset.reference))); $$('[data-hair]').forEach((button) => button.addEventListener("click", () => selectHair(button.dataset.hair))); $$('[data-face]').forEach((button) => button.addEventListener("click", () => selectFace(button.dataset.face)));
   ["#postureShoulder", "#postureWaist", "#postureHem"].forEach((selector) => $(selector).addEventListener("input", updatePosture)); $("#hairResult button").addEventListener("click", () => showToast("已记录所选参考；正式版将在这里调用人物换发模型。"));
-  $("#profileForm").addEventListener("submit", submitProfile); $("#openCamera").addEventListener("click", openCamera); $("#capturePhoto").addEventListener("click", capturePhoto); $("#bodyPhoto").addEventListener("change", (event) => loadPhoto(event.target.files[0], "#cameraCanvas", "#cameraPlaceholder", "#cameraMessage")); window.addEventListener("pagehide", stopCamera);
+  $("#profileForm").addEventListener("submit", submitProfile); $("#editProfile").addEventListener("click", () => showProfileStep("setup")); $("#createBodyProfile").addEventListener("click", () => showProfileStep("setup")); $("#startCapture").addEventListener("click", () => showProfileStep("capture")); $$('[data-profile-step]').forEach((button) => button.addEventListener("click", () => showProfileStep(button.dataset.profileStep)));
+  $("#openCamera").addEventListener("click", openCamera); $("#capturePhoto").addEventListener("click", capturePhoto); $("#bodyPhoto").addEventListener("change", (event) => loadBodyPhoto(event.target.files[0])); $("#downloadBodyPhoto").addEventListener("click", downloadBodyPhoto); $("#avatarFile").addEventListener("change", (event) => importAvatar(event.target.files[0])); $("#finishProfile").addEventListener("click", () => { renderProfileOverview(); showProfileStep("overview"); }); window.addEventListener("pagehide", stopCamera);
 }
 
 renderProducts(); loadProfile(); renderWardrobe(); renderBoard(); bindEvents();
