@@ -64,7 +64,7 @@ function selectProduct(id) {
 
 function renderWardrobe() {
   const shown = state.closet.filter((item) => state.closetCategory === "all" || item.category === state.closetCategory);
-  $("#closetGrid").innerHTML = shown.map((item) => `<button class="closet-card ${state.board.includes(item.id) ? "selected" : ""}" data-closet-id="${item.id}">${productArt(item)}<span><b>${item.name}</b><small>${item.note}</small><i>${state.board.includes(item.id) ? "已加入搭配" : "点按加入"}</i></span></button>`).join("");
+  $("#closetGrid").innerHTML = shown.map((item) => `<button class="closet-card ${state.board.includes(item.id) ? "selected" : ""} ${item.processing === "pending" ? "processing" : ""}" ${item.processing === "pending" ? "disabled" : `data-closet-id="${item.id}"`}>${productArt(item)}<span><b>${item.name}</b><small>${item.note}</small><i>${item.processing === "pending" ? "待去除背景并确认分类" : state.board.includes(item.id) ? "已加入搭配" : "点按加入"}</i></span></button>`).join("");
   $$('[data-closet-id]').forEach((button) => button.addEventListener("click", () => toggleBoardItem(button.dataset.closetId)));
 }
 
@@ -139,8 +139,8 @@ function readImageFile(file, done) {
 function addUploadedGarment(file) {
   readImageFile(file, (image) => {
     const id = `upload-${Date.now()}`;
-    state.closet.unshift({ id, name: "我上传的衣物", category: "top", image, note: "模拟识别：上衣 · 浅色 · 日常", match: 87, data: "用户上传 · 本次会话" });
-    $("#wardrobeStatus").textContent = "图片已加入衣橱。AI 抠图与分类当前为模拟结果，可以直接加入搭配。";
+    state.closet.unshift({ id, name: "待整理的衣物原图", category: "top", image, note: "原始材料 · 尚未生成独立单品", match: 87, data: "用户上传 · 本次会话", processing: "pending" });
+    $("#wardrobeStatus").textContent = "原图已收到。正式版会先识别衣物、去除背景并让你确认分类；当前未接入抠图，所以不会把这张杂乱原图直接放进搭配画板。";
     renderWardrobe();
   });
 }
@@ -175,7 +175,20 @@ function renderSelectedProduct() {
   $("#fitSizeRows").innerHTML = (product.sizes || fallbackSizes).map((row) => `<tr><td><b>${row.size}</b></td><td>${row.shoulder}</td><td>${row.chest}</td><td>${row.length}</td></tr>`).join("");
 }
 
-const easeTargets = { slim: { label: "修身", range: [0, 4] }, regular: { label: "合体", range: [4, 8] }, relaxed: { label: "微宽松", range: [8, 14] }, oversized: { label: "宽松", range: [14, 22] } };
+const easeTargets = {
+  slim: { label: "修身", range: [0, 4], description: "轮廓较清楚，胸身余量较少；更依赖准确围度和面料弹性。" },
+  regular: { label: "合体", range: [4, 8], description: "肩线接近自然肩点，胸身留有正常活动空间，衣长不过分放大身体。" },
+  relaxed: { label: "微宽松", range: [8, 12], description: "肩部和胸身略有余量，仍能看出身体轮廓，适合日常穿着。" },
+  loose: { label: "日常宽松", range: [12, 18], description: "落肩和胸身余量更明显，但衣长与袖长仍保持日常比例。" },
+  oversized: { label: "Oversize", range: [18, 26], description: "强调落肩、宽衣身和更大的整体量感，可能同时增加衣长与袖长。" }
+};
+
+function selectFit(type) {
+  state.fit = type;
+  $$('[data-fit]').forEach((item) => item.classList.toggle("active", item.dataset.fit === type));
+  const target = easeTargets[type];
+  $("#fitGoalDescription").textContent = `${target.label}：${target.description}`;
+}
 
 function calculateFit() {
   const height = Number($("#fitHeight").value), weight = Number($("#fitWeight").value);
@@ -194,9 +207,9 @@ function relationText(value, low, high) { if (value === null) return "数据不�
 
 function renderResult() {
   const result = state.result, product = state.product, unique = result.reliable;
-  $("#resultTitle").textContent = unique ? `建议优先试 ${result.primary.size} 码` : "暂不输出唯一尺码";
-  $("#resultSubtitle").textContent = unique ? `${product.name} · 目标效果“${result.target.label}”` : `缺少可靠胸围，先保留 ${result.primary.size} / ${result.alternative.size} 两个候选。`;
-  $("#resultHero").innerHTML = unique ? `<p class="eyebrow">首选尺码</p><div class="result-size">${result.primary.size}</div><h2>胸围松量约 ${result.primary.ease.toFixed(1)} cm</h2><p>最接近“${result.target.label}”的演示区间。</p><span class="confidence">可信度：中 · 含手工胸围</span>` : `<p class="eyebrow">候选尺码</p><div class="result-size">${result.primary.size}/${result.alternative.size}</div><h2>补充胸围后才能给出单一建议</h2><p>系统不会只凭身高体重编造答案。</p><span class="confidence">可信度：低 · 已降级</span>`;
+  $("#resultTitle").textContent = unique ? `预计呈现“${result.target.label}”` : "暂时只能给出效果范围";
+  $("#resultSubtitle").textContent = unique ? `${product.name} · 为接近这个效果，可优先试 ${result.primary.size} 码。` : `缺少可靠胸围，${result.primary.size} / ${result.alternative.size} 只能作为两个试穿候选。`;
+  $("#resultHero").innerHTML = unique ? `<p class="eyebrow">目标穿着效果</p><div class="result-effect">${result.target.label}</div><h2>肩部、胸身和衣长共同决定最终轮廓</h2><p>${result.target.description}</p><span class="confidence">尺码建议：${result.primary.size} · 可信度：中</span>` : `<p class="eyebrow">预计效果范围</p><div class="result-effect">${result.target.label}</div><h2>身体数据不足，暂不把某个尺码说成确定答案</h2><p>${result.target.description}</p><span class="confidence">候选尺码：${result.primary.size} / ${result.alternative.size} · 可信度：低</span>`;
   const delta = result.shoulderDelta;
   const dimensions = [
     ["胸围松量", result.chest ? relationText(result.primary.ease, result.target.range[0], result.target.range[1]) : "无法判断", result.chest ? `${result.primary.chest} − ${result.chest} = ${result.primary.ease.toFixed(1)} cm。` : "请手工填写胸围后再计算。"],
@@ -260,20 +273,34 @@ const faceReferences = {
   skin: ["皮肤状态记录 · 示例", "未来记录同一光线下的阶段变化，只给一般护理提醒，不作医疗诊断。"],
   brow: ["眉形与眼镜 · 示例", "未来可以比较眉形、镜框与脸部轮廓的整体协调程度。"]
 };
+const postureReferences = {
+  head: ["头颈位置 · 模拟观察", "未来通过规范正侧面照片或短视频，观察头部是否前伸或左右偏斜；只提供日常改善提示，不作医疗诊断。"],
+  shoulder: ["肩背状态 · 模拟观察", "观察圆肩倾向、左右肩高度和肩胛区域的对称性；拍摄姿势或衣服遮挡会影响结果。"],
+  trunk: ["躯干状态 · 模拟观察", "观察躯干是否侧倾或存在明显左右旋转，并区分暂时站姿与持续习惯。"],
+  pelvis: ["骨盆状态 · 模拟观察", "观察骨盆前后倾和左右高低趋势；单张正面照片无法给出可靠结论。"],
+  legs: ["下肢站姿 · 模拟观察", "观察膝盖方向、双腿对称性和站立受力趋势，不进行骨骼或关节诊断。"],
+  gait: ["动态步态 · 模拟观察", "通过短视频观察步幅、摆臂、左右重心和身体晃动，并记录长期变化。"]
+};
 
 function showReference(type) {
   $$('[data-reference]').forEach((button) => button.classList.toggle("active", button.dataset.reference === type));
   $$('[data-reference-panel]').forEach((panel) => panel.classList.toggle("active", panel.dataset.referencePanel === type));
+  if (type === "shape") renderShapeOverview();
 }
 function selectHair(type) { $$('[data-hair]').forEach((button) => button.classList.toggle("active", button.dataset.hair === type)); const [title, text] = hairReferences[type]; $("#hairResult b").textContent = title; $("#hairResult p").textContent = text; }
 function selectFace(type) { $$('[data-face]').forEach((button) => button.classList.toggle("active", button.dataset.face === type)); const [title, text] = faceReferences[type]; $("#faceResult b").textContent = title; $("#faceResult p").textContent = `${text} 当前为模拟数据。`; }
 
-function updatePosture() {
-  const shoulder = Number($("#postureShoulder").value), waist = Number($("#postureWaist").value), hem = Number($("#postureHem").value);
-  $("#shoulderOutput").textContent = shoulder > 0 ? `+${shoulder}` : shoulder; $("#waistOutput").textContent = waist > 0 ? `+${waist}` : waist; $("#hemOutput").textContent = hem;
-  $("#bodyDiagram").style.setProperty("--shoulder-width", `${116 + shoulder * 5}px`); $("#bodyDiagram").style.setProperty("--waist-top", `${158 - waist * 4}px`); $("#bodyDiagram").style.setProperty("--hem-wave", `${hem * 2}px`);
-  const posture = shoulder >= 3 ? "肩背打开" : shoulder <= -3 ? "含肩明显" : "自然站姿", waistText = waist >= 3 ? "提高腰线" : waist <= -3 ? "降低腰线" : "自然腰线", hemText = hem >= 4 ? "裤脚堆积较多" : hem <= 1 ? "裤脚利落" : "裤脚轻微堆积";
-  $("#postureResult b").textContent = `当前情景：${posture} / ${waistText}`; $("#postureResult p").textContent = `${posture}；${waistText}；${hemText}。这是模拟解释，不是体态诊断。`;
+function renderShapeOverview() {
+  const a = state.bodyAnalysis;
+  const values = a ? [["头身比例", a.headRatio], ["上半身比例", a.upperRatio], ["下半身比例", a.legRatio], ["视觉肩宽", a.shoulderRatio]] : [["头身比例", "待拍摄"], ["上下身比例", "待拍摄"], ["肩胯结构", "待补充"], ["整体轮廓", "待建立"]];
+  $("#shapeMetricGrid").innerHTML = values.map(([name, value]) => `<div><small>${name}</small><b>${value}</b></div>`).join("");
+}
+
+function selectPosture(type) {
+  $$('[data-posture]').forEach((button) => button.classList.toggle("active", button.dataset.posture === type));
+  const [title, text] = postureReferences[type];
+  $("#postureResult b").textContent = title;
+  $("#postureResult p").textContent = text;
 }
 
 function saveProfile() {
@@ -427,13 +454,13 @@ function bindEvents() {
   $("#uploadProduct").addEventListener("click", () => $("#productFile").click()); $("#productFile").addEventListener("change", (event) => { const file = event.target.files[0]; if (!file) return; readImageFile(file, (image) => { $("#uploadStatus").textContent = "商品图片已读取。尺码表识别当前为模拟，请确认样例数据。"; state.product = { ...products[0], id: "user-product", name: "我上传的短袖商品", image, note: "本地图片 · OCR 为 Demo 模拟" }; showView("fit"); }); });
   $("#browsePartners").addEventListener("click", () => $("#productList").scrollIntoView({ behavior: "smooth" }));
   $$('[data-category]').forEach((button) => button.addEventListener("click", () => { $$('[data-category]').forEach((item) => item.classList.toggle("active", item === button)); renderProducts(button.dataset.category); }));
-  $$('[data-fit]').forEach((button) => button.addEventListener("click", () => { state.fit = button.dataset.fit; $$('[data-fit]').forEach((item) => item.classList.toggle("active", item === button)); }));
+  $$('[data-fit]').forEach((button) => button.addEventListener("click", () => selectFit(button.dataset.fit)));
   $("#calculateFit").addEventListener("click", calculateFit); $("#generateTryon").addEventListener("click", () => showView("tryon")); $("#addToCloset").addEventListener("click", () => { if (!state.closet.some((item) => item.id === state.product.id)) state.closet.unshift(state.product); addToBoard(state.product.id); showToast("已加入衣橱"); showView("wardrobe"); });
   $("#selectPersonPhoto").addEventListener("click", () => $("#personPhoto").click()); $("#personPhoto").addEventListener("change", (event) => loadPersonPhoto(event.target.files[0])); $("#runTryon").addEventListener("click", runTryon);
-  $$('[data-reference]').forEach((button) => button.addEventListener("click", () => showReference(button.dataset.reference))); $$('[data-hair]').forEach((button) => button.addEventListener("click", () => selectHair(button.dataset.hair))); $$('[data-face]').forEach((button) => button.addEventListener("click", () => selectFace(button.dataset.face)));
-  ["#postureShoulder", "#postureWaist", "#postureHem"].forEach((selector) => $(selector).addEventListener("input", updatePosture)); $("#hairResult button").addEventListener("click", () => showToast("已记录所选参考；正式版将在这里调用人物换发模型。"));
+  $$('[data-reference]').forEach((button) => button.addEventListener("click", () => showReference(button.dataset.reference))); $$('[data-hair]').forEach((button) => button.addEventListener("click", () => selectHair(button.dataset.hair))); $$('[data-face]').forEach((button) => button.addEventListener("click", () => selectFace(button.dataset.face))); $$('[data-posture]').forEach((button) => button.addEventListener("click", () => selectPosture(button.dataset.posture)));
+  $("#hairResult button").addEventListener("click", () => showToast("已记录所选参考；正式版将在这里调用人物换发模型。"));
   $("#profileForm").addEventListener("submit", submitProfile); $("#editProfile").addEventListener("click", () => showProfileStep("setup")); $("#createBodyProfile").addEventListener("click", () => showProfileStep("setup")); $("#startCapture").addEventListener("click", () => showProfileStep("capture")); $$('[data-profile-step]').forEach((button) => button.addEventListener("click", () => showProfileStep(button.dataset.profileStep)));
   $("#openCamera").addEventListener("click", openCamera); $("#capturePhoto").addEventListener("click", capturePhoto); $("#bodyPhoto").addEventListener("change", (event) => loadBodyPhoto(event.target.files[0])); $("#downloadBodyPhoto").addEventListener("click", downloadBodyPhoto); $("#avatarFile").addEventListener("change", (event) => importAvatar(event.target.files[0])); $("#finishProfile").addEventListener("click", () => { renderProfileOverview(); showProfileStep("overview"); }); window.addEventListener("pagehide", stopCamera);
 }
 
-renderProducts(); loadProfile(); renderWardrobe(); renderBoard(); bindEvents();
+renderProducts(); loadProfile(); renderWardrobe(); renderBoard(); renderShapeOverview(); bindEvents();

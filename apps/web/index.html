@@ -32,8 +32,8 @@
       <div class="quick-grid home-actions">
         <button class="feature-card primary-feature" data-view="wardrobe"><span class="feature-icon">衣</span><b>打开我的衣橱</b><small>录入、整理和组合已有衣物</small></button>
         <button class="feature-card" data-view="tryon"><span class="feature-icon">试</span><b>看看上身效果</b><small>按次生成 · 当前为流程模拟</small></button>
-        <button class="feature-card" data-view="shop"><span class="feature-icon">选</span><b>判断商品与尺码</b><small>上传商品，比较版型和尺寸</small></button>
-        <button class="feature-card" data-view="imagine"><span class="feature-icon">变</span><b>探索不同的我</b><small>发型、面部、皮肤与体态</small></button>
+        <button class="feature-card" data-view="shop"><span class="feature-icon">选</span><b>帮我挑一件衣服</b><small>比较穿着效果，尺码只是建议之一</small></button>
+        <button class="feature-card" data-view="imagine"><span class="feature-icon">变</span><b>探索不同的我</b><small>身形、体态、发型与面部方向</small></button>
       </div>
 
       <article class="today-card">
@@ -43,20 +43,21 @@
 
       <div class="section-heading"><div><p class="eyebrow">以后可以继续完善</p><h2>同一个“我”的更多能力</h2></div></div>
       <div class="future-strip">
+        <button data-view="imagine" data-reference-jump="shape"><b>我的身形</b><small>身体比例档案</small></button>
         <button data-view="imagine" data-reference-jump="hair"><b>发型发色</b><small>概念体验</small></button>
         <button data-view="imagine" data-reference-jump="face"><b>面部与皮肤</b><small>模拟数据</small></button>
-        <button data-view="imagine" data-reference-jump="posture"><b>体态记录</b><small>模拟数据</small></button>
+        <button data-view="imagine" data-reference-jump="posture"><b>体态观察</b><small>姿势与动态记录</small></button>
       </div>
     </section>
 
     <section id="view-wardrobe" class="view" data-view-panel="wardrobe">
-      <div class="page-title"><p class="eyebrow">真实交互 · 本次会话</p><h1>我的衣橱</h1><p>拍下实物或上传商品图，整理以后每天真正会穿的衣服。</p></div>
+      <div class="page-title"><p class="eyebrow">真实交互 · 本次会话</p><h1>我的衣橱</h1><p>原始照片只是导入材料；系统整理成独立单品后，才能用于日常搭配。</p></div>
       <div class="route-grid">
         <button id="uploadGarment" class="route-card"><span>＋</span><b>上传衣物</b><small>拍实物 / 从相册选择</small></button>
         <button id="loadDemoCloset" class="route-card"><span>例</span><b>加入示例衣橱</b><small>快速体验组合功能</small></button>
       </div>
       <input id="garmentFile" type="file" accept="image/*" capture="environment" hidden>
-      <p id="wardrobeStatus" class="status-line" aria-live="polite"></p>
+      <p id="wardrobeStatus" class="status-line" aria-live="polite">正式流程：上传原图 → 识别衣物 → 去除背景 → 确认分类 → 保存为衣橱单品。当前自动抠图尚未接入。</p>
 
       <div class="filter-row" role="tablist" aria-label="衣橱分类">
         <button class="chip active" data-closet-category="all">全部</button>
@@ -67,14 +68,14 @@
       <div id="closetGrid" class="closet-grid"></div>
 
       <div class="section-heading"><div><p class="eyebrow">衣橱内功能</p><h2>今天这样穿</h2></div><button id="clearBoard" class="text-button">清空</button></div>
-      <p class="disclosure">点击上面的衣物加入画布；在画布中可以拖动位置。平铺搭配不产生生图费用。</p>
+      <p class="disclosure">画板应使用去除背景后的独立上衣、裤子和鞋子，而不是把几张原始照片并排。平铺搭配不产生生图费用。</p>
       <div id="outfitBoard" class="outfit-board"><div id="boardEmpty" class="board-empty"><b>空白搭配画布</b><small>从衣橱选择上衣、裤子和鞋子</small></div></div>
       <div class="board-actions"><button id="saveOutfit" class="main-button">保存这套穿搭</button><button id="boardTryon" class="secondary-button">生成上身效果</button></div>
       <div id="savedOutfits" class="saved-outfits"></div>
     </section>
 
     <section id="view-shop" class="view" data-view-panel="shop">
-      <div class="page-title"><p class="eyebrow">购买前再调用</p><h1>这件商品适合我吗？</h1><p>它不是首页中心，而是你准备买衣服时调用的一项判断能力。</p></div>
+      <div class="page-title"><p class="eyebrow">穿衣决策中的一个能力</p><h1>这件衣服能穿出我想要的效果吗？</h1><p>先判断轮廓、松量和长度，再把尺码作为实现目标效果的一条建议。</p></div>
       <div class="route-grid">
         <button id="uploadProduct" class="route-card"><span>＋</span><b>上传商品</b><small>商品图 / 尺码表 / 截图</small></button>
         <button id="browsePartners" class="route-card"><span>例</span><b>使用示例商品</b><small>实拍素材 + 样例尺码数据</small></button>
@@ -88,17 +89,17 @@
     <section id="view-fit" class="view" data-view-panel="fit">
       <button class="back-button" data-view="shop">← 返回商品</button>
       <div id="selectedProduct"></div>
-      <article class="panel"><div class="panel-title"><div><p class="eyebrow">STEP 1</p><h2>希望穿出什么感觉？</h2></div><span class="real-badge">参与计算</span></div><div class="choice-row"><button data-fit="slim">修身</button><button data-fit="regular" class="active">合体</button><button data-fit="relaxed">微宽松</button><button data-fit="oversized">宽松</button></div></article>
+      <article class="panel"><div class="panel-title"><div><p class="eyebrow">STEP 1 · 目标穿着效果</p><h2>希望衣服在身上是什么状态？</h2></div><span class="real-badge">主要目标</span></div><div class="choice-row fit-goals"><button data-fit="slim"><b>修身</b><small>轮廓清楚</small></button><button data-fit="regular" class="active"><b>合体</b><small>自然活动量</small></button><button data-fit="relaxed"><b>微宽松</b><small>略有余量</small></button><button data-fit="loose"><b>日常宽松</b><small>明显放松</small></button><button data-fit="oversized"><b>Oversize</b><small>强调大量感</small></button></div><p id="fitGoalDescription" class="fit-goal-description">合体：肩线接近自然肩点，胸身留有正常活动空间，衣长不过分放大身体。</p></article>
       <article class="panel"><div class="panel-title"><div><p class="eyebrow">STEP 2</p><h2>确认身体数据</h2></div><span class="real-badge">本地计算</span></div><div class="form-grid compact"><label>身高<input id="fitHeight" type="number" min="130" max="220"><span>cm</span></label><label>体重<input id="fitWeight" type="number" min="30" max="200"><span>kg</span></label><label>胸围<input id="fitChest" type="number" min="60" max="180" placeholder="选填"><span>cm</span></label><label>肩宽<input id="fitShoulder" type="number" min="30" max="70" placeholder="选填"><span>cm</span></label></div><p class="helper">胸围和肩宽可不填，但系统会降低结论置信度。</p></article>
-      <article class="panel size-panel"><div class="panel-title"><div><p class="eyebrow">商品数据</p><h2>商家尺码表</h2></div><span>成衣尺寸 · cm</span></div><div class="table-wrap"><table><thead><tr><th>尺码</th><th>肩宽</th><th>胸围</th><th>衣长</th></tr></thead><tbody id="fitSizeRows"></tbody></table></div></article>
-      <p id="fitError" class="error-line"></p><button id="calculateFit" class="main-button">计算适合程度</button>
+      <article class="panel size-panel"><div class="panel-title"><div><p class="eyebrow">辅助商品数据</p><h2>商家提供的成衣尺寸</h2></div><span>用于反推建议 · cm</span></div><div class="table-wrap"><table><thead><tr><th>尺码</th><th>肩宽</th><th>胸围</th><th>衣长</th></tr></thead><tbody id="fitSizeRows"></tbody></table></div></article>
+      <p id="fitError" class="error-line"></p><button id="calculateFit" class="main-button">查看预计穿着效果</button>
     </section>
 
     <section id="view-result" class="view" data-view-panel="result">
       <button class="back-button" data-view="fit">← 修改数据</button>
-      <div class="page-title"><p class="eyebrow">合身分析</p><h1 id="resultTitle">推荐结果</h1><p id="resultSubtitle"></p></div>
+      <div class="page-title"><p class="eyebrow">穿着效果分析</p><h1 id="resultTitle">预计穿着效果</h1><p id="resultSubtitle"></p></div>
       <article id="resultHero" class="result-hero"></article><div id="fitDimensions" class="dimension-list"></div>
-      <article class="explain-card"><b>计算与效果图分开</b><div><span>尺码判断</span><p>来自人体数据与尺码表。</p></div><div><span>效果图</span><p>只作为颜色、风格和轮廓参考。</p></div></article>
+      <article class="explain-card"><b>这是穿衣决策，不是尺码工具</b><div><span>穿着效果</span><p>先解释肩部、胸身、衣长和整体量感。</p></div><div><span>尺码建议</span><p>只是帮助接近目标效果的一项结果。</p></div><div><span>效果图</span><p>只作为颜色、风格和轮廓参考。</p></div></article>
       <div class="board-actions"><button id="generateTryon" class="main-button">去看上身效果</button><button id="addToCloset" class="secondary-button">加入我的衣橱</button></div>
     </section>
 
@@ -117,10 +118,11 @@
 
     <section id="view-imagine" class="view" data-view-panel="imagine">
       <div class="page-title"><p class="eyebrow">未来方向 · 模拟数据</p><h1>探索不同的自己</h1><p>这些交互展示未来方向，当前不进行医疗判断，也不预测真实身体变化。</p></div>
-      <div class="choice-row reference-tabs"><button class="active" data-reference="hair">发型发色</button><button data-reference="face">面部与皮肤</button><button data-reference="posture">体态</button></div>
+      <div class="choice-row reference-tabs"><button class="active" data-reference="hair">发型发色</button><button data-reference="face">面部与皮肤</button><button data-reference="shape">身形档案</button><button data-reference="posture">体态观察</button></div>
       <div class="reference-panel active" data-reference-panel="hair"><div id="hairGallery" class="reference-gallery"><button class="reference-card active" data-hair="short"><img src="assets/hair-short.jpg" alt="自然短发参考"><b>自然短发</b><small>突出颈肩</small></button><button class="reference-card" data-hair="curly"><img src="assets/hair-curly.jpg" alt="卷发参考"><b>蓬松卷发</b><small>增加轮廓感</small></button><button class="reference-card" data-hair="long"><img src="assets/hair-long.jpg" alt="长发参考"><b>长层次发</b><small>强化纵向线条</small></button><button class="reference-card" data-hair="red"><img src="assets/hair-red.jpg" alt="暖红短发参考"><b>暖红短发</b><small>面部附近更醒目</small></button></div><article id="hairResult" class="data-result"><b>自然短发 · 参考分析</b><p>颈肩区域更清楚，适合比较领口和肩线。</p><button class="secondary-button">用我的照片模拟</button></article></div>
       <div class="reference-panel" data-reference-panel="face"><article class="panel"><h2>今天想关注什么？</h2><div class="choice-row"><button class="active" data-face="tone">肤色与配色</button><button data-face="skin">皮肤状态记录</button><button data-face="brow">眉形与眼镜</button></div></article><article id="faceResult" class="data-result"><b>肤色与配色 · 示例</b><p>当前为模拟结论：低饱和蓝绿色放在面部附近更柔和。未来可比较同一用户不同时期的照片，但不作皮肤疾病诊断。</p></article></div>
-      <div class="reference-panel" data-reference-panel="posture"><article class="posture-tool"><div id="bodyDiagram" class="body-diagram"><i class="diagram-head"></i><i class="diagram-body"></i><i class="shoulder-line"></i><i class="waist-line"></i></div><div class="slider-list"><label>肩背打开程度 <output id="shoulderOutput">0</output><input id="postureShoulder" type="range" min="-5" max="5" value="0"></label><label>视觉腰线位置 <output id="waistOutput">0</output><input id="postureWaist" type="range" min="-5" max="5" value="0"></label><label>裤脚堆积程度 <output id="hemOutput">2</output><input id="postureHem" type="range" min="0" max="5" value="2"></label></div></article><article id="postureResult" class="data-result"><b>当前情景：自然站姿</b><p>拖动参数查看穿搭轮廓变化；这是交互模拟，不是体态诊断。</p></article></div>
+      <div class="reference-panel" data-reference-panel="shape"><article class="panel"><div class="panel-title"><div><p class="eyebrow">身体本身的客观外形</p><h2>我的身形档案</h2></div><span>来自标准照与基础资料</span></div><div id="shapeMetricGrid" class="appearance-metric-grid"></div></article><article class="data-result"><b>身形不等于体态，也不等于穿衣效果</b><p>这里保存头身、上下身和肩部等身体比例；宽松度、落肩和衣长属于具体衣服的穿着效果。</p></article></div>
+      <div class="reference-panel" data-reference-panel="posture"><article class="panel"><div class="panel-title"><div><p class="eyebrow">站立姿势与动态表现</p><h2>体态观察维度</h2></div><span>未来视频能力</span></div><div class="posture-category-grid"><button class="active" data-posture="head"><b>头颈</b><small>前伸与左右偏斜</small></button><button data-posture="shoulder"><b>肩背</b><small>圆肩与高低肩</small></button><button data-posture="trunk"><b>躯干</b><small>侧倾与左右旋转</small></button><button data-posture="pelvis"><b>骨盆</b><small>前后倾与高低差</small></button><button data-posture="legs"><b>下肢</b><small>膝盖方向与站姿受力</small></button><button data-posture="gait"><b>动态步态</b><small>步幅、摆臂与重心</small></button></div></article><article id="postureResult" class="data-result"><b>头颈位置 · 模拟观察</b><p>未来通过规范正侧面照片或短视频，观察头部是否前伸或左右偏斜；只提供日常改善提示，不作医疗诊断。</p></article></div>
     </section>
 
     <section id="view-profile" class="view" data-view-panel="profile">
@@ -131,7 +133,7 @@
           <div class="profile-avatar"><img id="profileAvatarImage" alt="我的二维基础形象" hidden><span id="profileAvatarPlaceholder">尚未创建<br>二维形象</span></div>
           <div><p class="eyebrow">我的基础形象</p><h2 id="profileOverviewTitle">从一张规范照片开始</h2><p id="profileOverviewText">完成后会得到身体比例档案，并可导入 Codex 生成的二维形象。</p></div>
         </article>
-        <article class="profile-group"><div class="panel-title"><div><p class="eyebrow">基本资料</p><h2>用于比例与尺码判断</h2></div><button id="editProfile" type="button" class="text-button">编辑</button></div><div id="profileSummaryGrid" class="summary-grid"></div></article>
+        <article class="profile-group"><div class="panel-title"><div><p class="eyebrow">基本资料</p><h2>所有外形能力共用的基础</h2></div><button id="editProfile" type="button" class="text-button">编辑</button></div><div id="profileSummaryGrid" class="summary-grid"></div></article>
         <article class="profile-group"><p class="eyebrow">身体档案</p><h2 id="bodyProfileState">还没有照片分析</h2><p id="bodyProfileHint">正面照只估算可见比例，胸围、腰围和臀围仍以手工测量为准。</p><button id="createBodyProfile" type="button" class="main-button">拍照建立身体档案</button></article>
       </section>
 
@@ -167,7 +169,7 @@
   <nav class="bottom-nav" aria-label="主要导航"><button class="active" data-view="home"><span>⌂</span>Agent</button><button data-view="wardrobe"><span>衣</span>衣橱</button><button data-view="tryon"><span>试</span>试穿</button><button data-view="imagine"><span>变</span>探索</button><button data-view="profile"><span>我</span>我的</button></nav>
 </div>
 
-<dialog id="infoDialog"><button class="dialog-close" aria-label="关闭">×</button><h2>这一版怎样理解？</h2><ul><li><b>真实交互：</b>本地外形档案、衣物上传、衣橱选择、搭配画布、保存搭配和尺码规则。</li><li><b>流程模拟：</b>AI 抠图、真人试穿和 Agent 生成。</li><li><b>未来展示：</b>发型、面部、皮肤和体态使用明确标记的模拟数据。</li></ul><p>所有模块共享同一个“我”，但用户可以只用衣橱或只用试穿，不需要完成固定流程。</p></dialog>
+<dialog id="infoDialog"><button class="dialog-close" aria-label="关闭">×</button><h2>这一版怎样理解？</h2><ul><li><b>产品底座：</b>个人外形档案，让身形、衣橱、穿搭和未来能力共享同一个“我”。</li><li><b>真实交互：</b>本地外形档案、衣物上传、衣橱选择、搭配画布和保存搭配。</li><li><b>辅助能力：</b>穿着效果比较中包含尺码建议，但尺码不是产品中心。</li><li><b>流程模拟：</b>AI 抠图、真人试穿和 Agent 生成。</li><li><b>未来展示：</b>发型、面部、皮肤、身形与体态使用明确标记的模拟数据。</li></ul><p>所有模块共享同一个“我”，但用户可以只用衣橱或只用试穿，不需要完成固定流程。</p></dialog>
 <div id="toast" role="status" aria-live="polite"></div>
 <script src="capture-coach.js"></script>
 <script src="app.js"></script>
