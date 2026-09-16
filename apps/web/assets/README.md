@@ -12,4 +12,9 @@
 - `hair-long.jpg`: Pexels / Joseilson De lima, photo `36784935`
 - `hair-red.jpg`: Pexels / Christina Chekhomova, photo `11054052`
 
+The `wardrobe-*` files are temporary product-reference images collected from
+Pinterest search results on 2026-09-16 for this non-commercial prototype. They
+are deliberately labelled as demo data in the UI and must be replaced with
+merchant-provided, user-owned, or explicitly licensed assets before release.
+
 对外商业发布前应再次核对届时有效的图库许可、人物肖像使用条件与署名要求，并用品牌自有或取得明确授权的商品素材替换。

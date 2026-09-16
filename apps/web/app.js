@@ -1,16 +1,22 @@
 "use strict";
 
 const products = [
-  { id: "tee-white", name: "白色基础短袖", category: "top", image: "assets/product-tshirt.jpg", note: "V 领 · 常规衣长 · 样例尺码 M–3XL", match: 92, data: "肩宽 55–61 / 胸围 107–120 cm", sizes: [
+  { id: "tee-white", name: "白色针织短袖", category: "top", image: "assets/wardrobe-top-white.jpg", note: "方圆领 · 修身短款", color: "柔白", season: "春夏", match: 92, data: "肩宽 55–61 / 胸围 107–120 cm", sizes: [
     { size: "M", shoulder: 55, chest: 107, length: 68.5 }, { size: "L", shoulder: 56.5, chest: 110, length: 70.5 },
     { size: "XL", shoulder: 58, chest: 113, length: 72.5 }, { size: "2XL", shoulder: 59.5, chest: 117, length: 74.5 },
     { size: "3XL", shoulder: 61, chest: 120, length: 76.5 }
   ]},
-  { id: "shirt-blue", name: "清爽通勤衬衫", category: "top", image: "assets/product-shirts.jpg", note: "常规领型 · 轮廓清楚", match: 88, data: "示例规格：胸围 104–116 cm" },
-  { id: "knit-khaki", name: "米色针织上衣", category: "top", image: "assets/product-flatlay.jpg", note: "柔软材质 · 适合叠穿", match: 89, data: "模拟衣橱数据" },
-  { id: "jeans-blue", name: "蓝色直筒牛仔裤", category: "bottom", image: "assets/product-jeans.jpg", note: "中腰 · 直筒 · 常规裤长", match: 86, data: "示例规格：腰围 70–86 cm" },
-  { id: "pants-dark", name: "深色通勤长裤", category: "bottom", image: "assets/product-flatlay.jpg", note: "直筒 · 视觉重心稳定", match: 90, data: "模拟衣橱数据" },
-  { id: "shoe-grey", name: "灰色缓震运动鞋", category: "shoe", image: "assets/product-sneaker.jpg", note: "休闲 · 浅色收尾", match: 91, data: "示例数据：前掌常规" }
+  { id: "cardigan-black", name: "黑色短款开衫", category: "outer", image: "assets/wardrobe-outer-black.jpg", note: "V 领 · 细针织", color: "黑色", season: "四季", match: 88, data: "演示衣橱数据" },
+  { id: "skirt-cargo", name: "白色工装短裙", category: "skirt", image: "assets/wardrobe-skirt-cargo.jpg", note: "高腰 · 侧袋", color: "柔白", season: "春夏", match: 89, data: "演示衣橱数据" },
+  { id: "skirt-mini", name: "白色极简短裙", category: "skirt", image: "assets/wardrobe-skirt-mini.jpg", note: "低腰 · A 字", color: "白色", season: "春夏", match: 86, data: "演示衣橱数据" },
+  { id: "skirt-pleated", name: "白色百褶裙", category: "skirt", image: "assets/wardrobe-skirt-white.jpg", note: "高腰 · 中短款", color: "白色", season: "春夏", match: 91, data: "演示衣橱数据" },
+  { id: "skirt-long", name: "象牙白长裙", category: "skirt", image: "assets/wardrobe-skirt-long.jpg", note: "直筒 · 垂顺长款", color: "象牙白", season: "四季", match: 90, data: "演示衣橱数据" },
+  { id: "skirt-stripe", name: "条纹针织半裙", category: "skirt", image: "assets/wardrobe-bottom-blue.jpg", note: "包臀 · 及踝", color: "燕麦色", season: "秋冬", match: 87, data: "演示衣橱数据" },
+  { id: "skirt-denim", name: "蓝色牛仔短裙", category: "skirt", image: "assets/wardrobe-bottom-cream.jpg", note: "中腰 · 复古水洗", color: "牛仔蓝", season: "四季", match: 86, data: "演示衣橱数据" },
+  { id: "pants-balloon", name: "奶油白灯笼裤", category: "bottom", image: "assets/wardrobe-bottom-pleated.jpg", note: "高腰 · 宽松廓形", color: "奶油白", season: "春夏", match: 90, data: "演示衣橱数据" },
+  { id: "skirt-casual", name: "浅灰抽绳短裙", category: "skirt", image: "assets/wardrobe-bottom-black.jpg", note: "中腰 · 休闲短款", color: "浅灰", season: "春夏", match: 84, data: "演示衣橱数据" },
+  { id: "shirt-blue", name: "清爽通勤衬衫", category: "top", image: "assets/wardrobe-shirt-blue.jpg", note: "常规领型 · 轻薄叠穿", color: "雾霾蓝", season: "春夏", match: 88, data: "示例规格：胸围 104–116 cm" },
+  { id: "shoe-grey", name: "灰白缓震运动鞋", category: "shoe", image: "assets/wardrobe-shoe-white.jpg", note: "低帮 · 日常休闲", color: "灰白", season: "四季", match: 91, data: "示例数据：前掌常规" }
 ];
 
 const fallbackSizes = products[0].sizes;
@@ -19,7 +25,7 @@ const state = {
   profile: { version: 2, height: 175, weight: 68, age: null, system: "unisex", chest: null, shoulder: null, waist: null, hip: null, arm: null, inseam: null, foot: null, forefoot: null, createdAt: null },
   product: products[0], fit: "regular", result: null, stream: null, captureCoach: null, tryonTimer: null,
   closet: [...products], closetCategory: "all",
-  board: ["tee-white", "jeans-blue", "shoe-grey"],
+  board: ["tee-white", "skirt-long", "shoe-grey"],
   boardPositions: {}, savedOutfits: [], personPhoto: null, basePhoto: null, avatarPhoto: null, bodyAnalysis: null
 };
 
@@ -40,7 +46,8 @@ function showView(view) {
 
 function safeProduct(id) { return state.closet.find((item) => item.id === id) || products.find((item) => item.id === id); }
 function productArt(product) { return `<div class="product-art"><img src="${product.image}" alt="${product.name}" loading="lazy"></div>`; }
-function productTags(product) { return `<div class="tags"><span class="tag">示例匹配 ${product.match || 85}%</span><span class="tag">${product.category === "top" ? "上衣" : product.category === "bottom" ? "裤子" : "鞋子"}</span></div>`; }
+const categoryLabels = { top: "上衣", outer: "外套", skirt: "半身裙", bottom: "裤子", dress: "连体裙", shoe: "鞋子" };
+function productTags(product) { return `<div class="tags"><span class="tag">示例匹配 ${product.match || 85}%</span><span class="tag">${categoryLabels[product.category] || "其他"}</span></div>`; }
 
 function renderProducts(category = "all") {
   const shown = products.filter((item) => category === "all" || item.category === category);
@@ -64,7 +71,7 @@ function selectProduct(id) {
 
 function renderWardrobe() {
   const shown = state.closet.filter((item) => state.closetCategory === "all" || item.category === state.closetCategory);
-  $("#closetGrid").innerHTML = shown.map((item) => `<button class="closet-card ${state.board.includes(item.id) ? "selected" : ""} ${item.processing === "pending" ? "processing" : ""}" ${item.processing === "pending" ? "disabled" : `data-closet-id="${item.id}"`}>${productArt(item)}<span><b>${item.name}</b><small>${item.note}</small><i>${item.processing === "pending" ? "待去除背景并确认分类" : state.board.includes(item.id) ? "已加入搭配" : "点按加入"}</i></span></button>`).join("");
+  $("#closetGrid").innerHTML = shown.map((item) => `<button class="closet-card ${state.board.includes(item.id) ? "selected" : ""}" data-closet-id="${item.id}">${productArt(item)}<span><b>${item.name}</b><small>${item.color || "已整理"} · ${categoryLabels[item.category] || "其他"}</small><i>${state.board.includes(item.id) ? "✓ 已加入搭配" : "＋ 加入搭配"}</i></span></button>`).join("");
   $$('[data-closet-id]').forEach((button) => button.addEventListener("click", () => toggleBoardItem(button.dataset.closetId)));
 }
 
@@ -84,8 +91,8 @@ function removeFromBoard(id) {
 }
 
 function defaultBoardPosition(item, index) {
-  const group = item.category === "top" ? 0 : item.category === "bottom" ? 1 : 2;
-  return { x: 8 + group * 30 + (index % 2) * 5, y: 18 + (index % 3) * 18 };
+  const group = ["top", "outer"].includes(item.category) ? 0 : ["bottom", "skirt", "dress"].includes(item.category) ? 1 : 2;
+  return { x: 34 + (index % 2) * 7, y: 4 + group * 29 + (index % 2) * 5 };
 }
 
 function renderBoard() {
@@ -136,13 +143,39 @@ function readImageFile(file, done) {
   reader.readAsDataURL(file);
 }
 
+function createGarmentCutout(imageUrl, done) {
+  const image = new Image();
+  image.onload = () => {
+    const max = 900, scale = Math.min(1, max / Math.max(image.naturalWidth, image.naturalHeight));
+    const canvas = document.createElement("canvas"); canvas.width = Math.round(image.naturalWidth * scale); canvas.height = Math.round(image.naturalHeight * scale);
+    const context = canvas.getContext("2d", { willReadFrequently: true }); context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    const pixels = context.getImageData(0, 0, canvas.width, canvas.height), data = pixels.data;
+    const samples = [[2,2],[canvas.width-3,2],[2,canvas.height-3],[canvas.width-3,canvas.height-3]].map(([x,y]) => { const i=(y*canvas.width+x)*4; return [data[i],data[i+1],data[i+2]]; });
+    const bg = samples.reduce((sum, color) => sum.map((value, i) => value + color[i] / samples.length), [0,0,0]);
+    for (let i=0;i<data.length;i+=4) { const distance = Math.hypot(data[i]-bg[0],data[i+1]-bg[1],data[i+2]-bg[2]); if (distance < 28) data[i+3]=0; else if (distance < 62) data[i+3]=Math.round(data[i+3]*(distance-28)/34); }
+    context.putImageData(pixels,0,0); done(canvas.toDataURL("image/png"));
+  };
+  image.src = imageUrl;
+}
+
 function addUploadedGarment(file) {
   readImageFile(file, (image) => {
-    const id = `upload-${Date.now()}`;
-    state.closet.unshift({ id, name: "待整理的衣物原图", category: "top", image, note: "原始材料 · 尚未生成独立单品", match: 87, data: "用户上传 · 本次会话", processing: "pending" });
-    $("#wardrobeStatus").textContent = "原图已收到。正式版会先识别衣物、去除背景并让你确认分类；当前未接入抠图，所以不会把这张杂乱原图直接放进搭配画板。";
-    renderWardrobe();
+    const dialog = $("#garmentDialog"); $("#garmentOriginal").src = image; $("#garmentGenerated").hidden = true; $("#garmentProcessing").hidden = false; $("#garmentForm").hidden = true; $("#garmentDialogTitle").textContent = "正在识别这件衣物"; dialog.dataset.image = ""; dialog.showModal();
+    setTimeout(() => createGarmentCutout(image, (generated) => { dialog.dataset.image = generated; $("#garmentGenerated").src = generated; $("#garmentGenerated").hidden = false; $("#garmentProcessing").hidden = true; $("#garmentForm").hidden = false; $("#garmentDialogTitle").textContent = "确认 AI 整理结果"; }), 650);
   });
+}
+
+function saveUploadedGarment(event) {
+  event.preventDefault(); const dialog = $("#garmentDialog"), name = $("#garmentName").value.trim() || "我的新单品", category = $("#garmentCategory").value;
+  state.closet.unshift({ id: `upload-${Date.now()}`, name, category, image: dialog.dataset.image || $("#garmentOriginal").src, note: "本地 AI 整理 · 用户确认", color: "待补充", season: "四季", match: 87, data: "用户上传 · 本机保存" });
+  try { localStorage.setItem("ziru-demo-custom-closet", JSON.stringify(state.closet.filter((item) => item.id.startsWith("upload-")))); } catch {}
+  dialog.close(); $("#garmentFile").value = ""; $("#wardrobeStatus").textContent = `“${name}”已整理并加入衣橱，可以直接用于 DIY 搭配。`; renderWardrobe(); showToast("新单品已加入衣橱");
+}
+
+function autoCompose() {
+  state.boardPositions = {};
+  renderBoard();
+  showToast("已按上装、下装和鞋履重新排版");
 }
 
 function saveOutfit() {
@@ -263,15 +296,15 @@ function runTryon() {
 }
 
 const hairReferences = {
-  short: ["自然短发 · 参考分析", "颈肩区域更清楚，适合比较领口和肩线。"],
-  curly: ["蓬松卷发 · 参考分析", "头部轮廓感增强，搭配时可以减少肩部附近的复杂装饰。"],
-  long: ["长层次发 · 参考分析", "纵向线条更明显，但会遮挡一部分肩线。"],
-  red: ["暖红短发 · 参考分析", "视觉焦点靠近面部，衣服颜色可以适当降低饱和度。"]
+  short: ["轻盈短层次", "露出颈肩线，适合圆领、方领与利落通勤风。"],
+  curly: ["蓬松纹理卷", "增加头顶和两侧发量，搭配简洁领口会更平衡。"],
+  long: ["长层次直发", "面部两侧的层次可以柔化轮廓，视觉线条更舒展。"],
+  red: ["暖栗红短发", "暖色发色会把焦点拉向面部，衣着适合降低饱和度。"]
 };
 const faceReferences = {
-  tone: ["肤色与配色 · 示例", "当前为模拟结论：低饱和蓝绿色放在面部附近更柔和。"],
-  skin: ["皮肤状态记录 · 示例", "未来记录同一光线下的阶段变化，只给一般护理提醒，不作医疗诊断。"],
-  brow: ["眉形与眼镜 · 示例", "未来可以比较眉形、镜框与脸部轮廓的整体协调程度。"]
+  tone: ["中性偏暖 · 低对比", "雾霾蓝、鼠尾草绿和柔白靠近面部时更协调；避免大面积荧光色。"],
+  skin: ["本周状态稳定", "水润感 82、均匀度 74。建议继续保持当前作息，并在相同光线下每周记录。"],
+  brow: ["柔和直眉 · 轻量镜框", "平缓眉峰能保持自然感；细金属或半透明镜框比厚重黑框更轻盈。"]
 };
 const postureReferences = {
   head: ["头颈位置 · 模拟观察", "未来通过规范正侧面照片或短视频，观察头部是否前伸或左右偏斜；只提供日常改善提示，不作医疗诊断。"],
@@ -287,8 +320,8 @@ function showReference(type) {
   $$('[data-reference-panel]').forEach((panel) => panel.classList.toggle("active", panel.dataset.referencePanel === type));
   if (type === "shape") renderShapeOverview();
 }
-function selectHair(type) { $$('[data-hair]').forEach((button) => button.classList.toggle("active", button.dataset.hair === type)); const [title, text] = hairReferences[type]; $("#hairResult b").textContent = title; $("#hairResult p").textContent = text; }
-function selectFace(type) { $$('[data-face]').forEach((button) => button.classList.toggle("active", button.dataset.face === type)); const [title, text] = faceReferences[type]; $("#faceResult b").textContent = title; $("#faceResult p").textContent = `${text} 当前为模拟数据。`; }
+function selectHair(type) { $$('[data-hair]').forEach((button) => button.classList.toggle("active", button.dataset.hair === type)); const [title, text] = hairReferences[type]; $("#hairResult > div > b").textContent = title; $("#hairResult p").textContent = text; }
+function selectFace(type) { $$('[data-face]').forEach((button) => button.classList.toggle("active", button.dataset.face === type)); const [title, text] = faceReferences[type]; $("#faceResult > div > b").textContent = title; $("#faceResult p").textContent = text; }
 
 function renderShapeOverview() {
   const a = state.bodyAnalysis;
@@ -318,6 +351,7 @@ function loadProfile() {
       state.profile = saved.version === 2 ? { ...state.profile, ...saved } : { ...state.profile, height: saved.height || state.profile.height, weight: saved.weight || state.profile.weight };
     }
     const outfits = JSON.parse(localStorage.getItem("ziru-demo-outfits")); if (Array.isArray(outfits)) state.savedOutfits = outfits;
+    const customCloset = JSON.parse(localStorage.getItem("ziru-demo-custom-closet")); if (Array.isArray(customCloset)) state.closet = [...customCloset, ...products];
     state.bodyAnalysis = JSON.parse(localStorage.getItem("ziru-demo-body-analysis")) || null;
     state.basePhoto = localStorage.getItem("ziru-demo-base-photo"); state.avatarPhoto = localStorage.getItem("ziru-demo-avatar-photo");
   } catch {}
@@ -372,13 +406,19 @@ function buildBodyAnalysis(result, width, height) {
   const headCount = Math.max(5.5, Math.min(9, bodyPx / headPx));
   const upper = Math.max(0, Math.min(1, (hipMidY - result.headY) * height / bodyPx));
   const leg = Math.max(0, Math.min(1, (result.footY - hipMidY) * height / bodyPx));
-  const slope = Math.abs(Math.atan2((p[12].y - p[11].y) * height, (p[12].x - p[11].x) * width) * 180 / Math.PI);
-  return { headRatio: `约 ${headCount.toFixed(1)} 头身`, shoulderRatio: `身高画面的 ${(shoulderPx / bodyPx * 100).toFixed(1)}%`, upperRatio: `${(upper * 100).toFixed(0)}%`, legRatio: `${(leg * 100).toFixed(0)}%`, shoulderSlope: slope < 3 ? "基本水平" : slope < 7 ? "轻微高低差" : "建议复核站姿", quality: result.ready ? "标准" : result.fullBody && result.distance ? "可用，建议复核" : "条件不足", confidence: result.fullBody && result.distance ? "中" : "低" };
+  const rawSlope = Math.abs(Math.atan2((p[12].y - p[11].y) * height, (p[12].x - p[11].x) * width) * 180 / Math.PI);
+  const slope = Math.min(rawSlope, 180 - rawSlope);
+  const estimates = window.BodyEstimator?.estimateBodyDimensions({ points: p, width, height, headY: result.headY, footY: result.footY, knownHeightCm: state.profile.height, capture: result }) || null;
+  return { headRatio: `约 ${headCount.toFixed(1)} 头身`, shoulderRatio: `身高画面的 ${(shoulderPx / bodyPx * 100).toFixed(1)}%`, upperRatio: `${(upper * 100).toFixed(0)}%`, legRatio: `${(leg * 100).toFixed(0)}%`, shoulderSlope: slope < 3 ? "基本水平" : slope < 7 ? "轻微高低差" : "建议复核站姿", quality: result.ready ? "标准" : result.fullBody && result.distance ? "可用，建议复核" : "条件不足", confidence: estimates?.confidence || (result.fullBody && result.distance ? "中" : "低"), estimates };
 }
 
 function renderBodyAnalysis() {
   const a = state.bodyAnalysis;
-  $("#bodyMetrics").innerHTML = [["头身比例",a.headRatio],["视觉肩宽",a.shoulderRatio],["头顶至髋部",a.upperRatio],["髋部至脚底",a.legRatio],["肩线状态",a.shoulderSlope],["结果可信度",a.confidence]].map(([key,value]) => `<article><small>${key}</small><b>${value}</b></article>`).join("");
+  const range = (measurement) => measurement ? `${measurement.intervalCm[0]}–${measurement.intervalCm[1]} cm` : "关键点不足";
+  const estimates = a.estimates?.measurements || {};
+  $("#bodyMetrics").innerHTML = [["头身比例",a.headRatio],["姿态肩点跨度",range(estimates.poseShoulderSpan)],["投影臂长",range(estimates.projectedArmLength)],["投影腿长",range(estimates.projectedLegLength)],["肩线状态",a.shoulderSlope],["结果可信度",a.confidence]].map(([key,value]) => `<article><small>${key}</small><b>${value}</b></article>`).join("");
+  const note = $("#measurementEstimateNote");
+  if (note) note.textContent = a.estimates ? `按已知身高 ${a.estimates.knownHeightCm} cm 做二维标定。区间不是统计置信区间，体重不参与长度推算；胸围、腰围仍需手工测量。` : "未得到完整姿态关键点，暂不生成厘米估算。";
   $("#analysisPhoto").src = state.basePhoto;
 }
 
@@ -447,10 +487,11 @@ function bindEvents() {
   $$('[data-view]').forEach((button) => button.addEventListener("click", () => { showView(button.dataset.view); if (button.dataset.referenceJump) showReference(button.dataset.referenceJump); }));
   $("#demoInfo").addEventListener("click", () => $("#infoDialog").showModal()); $(".dialog-close").addEventListener("click", () => $("#infoDialog").close()); $("#infoDialog").addEventListener("click", (event) => { if (event.target === $("#infoDialog")) $("#infoDialog").close(); });
   $("#runAgent").addEventListener("click", runAgent); $("#agentPrompt").addEventListener("keydown", (event) => { if (event.key === "Enter") runAgent(); });
-  $("#uploadGarment").addEventListener("click", () => $("#garmentFile").click()); $("#garmentFile").addEventListener("change", (event) => addUploadedGarment(event.target.files[0]));
-  $("#loadDemoCloset").addEventListener("click", () => { state.closet = [...products]; $("#wardrobeStatus").textContent = "已载入 6 件示例衣物，可直接点选组合。"; renderWardrobe(); });
+  $("#uploadGarment").addEventListener("click", () => $("#garmentFile").click()); $("#scanGarment").addEventListener("click", () => $("#garmentFile").click()); $("#garmentFile").addEventListener("change", (event) => addUploadedGarment(event.target.files[0]));
+  $("#closeGarmentDialog").addEventListener("click", () => $("#garmentDialog").close()); $("#garmentForm").addEventListener("submit", saveUploadedGarment);
+  $("#loadDemoCloset").addEventListener("click", () => { state.closet = [...products]; localStorage.removeItem("ziru-demo-custom-closet"); $("#wardrobeStatus").textContent = "已恢复 12 件统一示例单品，可直接点选组合。"; renderWardrobe(); });
   $$('[data-closet-category]').forEach((button) => button.addEventListener("click", () => { state.closetCategory = button.dataset.closetCategory; $$('[data-closet-category]').forEach((item) => item.classList.toggle("active", item === button)); renderWardrobe(); }));
-  $("#clearBoard").addEventListener("click", () => { state.board = []; state.boardPositions = {}; renderWardrobe(); renderBoard(); }); $("#saveOutfit").addEventListener("click", saveOutfit); $("#boardTryon").addEventListener("click", () => showView("tryon"));
+  $("#clearBoard").addEventListener("click", () => { state.board = []; state.boardPositions = {}; renderWardrobe(); renderBoard(); }); $("#autoCompose").addEventListener("click", autoCompose); $("#saveOutfit").addEventListener("click", saveOutfit); $("#boardTryon").addEventListener("click", () => showView("tryon"));
   $("#uploadProduct").addEventListener("click", () => $("#productFile").click()); $("#productFile").addEventListener("change", (event) => { const file = event.target.files[0]; if (!file) return; readImageFile(file, (image) => { $("#uploadStatus").textContent = "商品图片已读取。尺码表识别当前为模拟，请确认样例数据。"; state.product = { ...products[0], id: "user-product", name: "我上传的短袖商品", image, note: "本地图片 · OCR 为 Demo 模拟" }; showView("fit"); }); });
   $("#browsePartners").addEventListener("click", () => $("#productList").scrollIntoView({ behavior: "smooth" }));
   $$('[data-category]').forEach((button) => button.addEventListener("click", () => { $$('[data-category]').forEach((item) => item.classList.toggle("active", item === button)); renderProducts(button.dataset.category); }));
@@ -459,6 +500,7 @@ function bindEvents() {
   $("#selectPersonPhoto").addEventListener("click", () => $("#personPhoto").click()); $("#personPhoto").addEventListener("change", (event) => loadPersonPhoto(event.target.files[0])); $("#runTryon").addEventListener("click", runTryon);
   $$('[data-reference]').forEach((button) => button.addEventListener("click", () => showReference(button.dataset.reference))); $$('[data-hair]').forEach((button) => button.addEventListener("click", () => selectHair(button.dataset.hair))); $$('[data-face]').forEach((button) => button.addEventListener("click", () => selectFace(button.dataset.face))); $$('[data-posture]').forEach((button) => button.addEventListener("click", () => selectPosture(button.dataset.posture)));
   $("#hairResult button").addEventListener("click", () => showToast("已记录所选参考；正式版将在这里调用人物换发模型。"));
+  $("#uploadHair").addEventListener("click", () => $("#hairPhoto").click()); $("#hairPhoto").addEventListener("change", (event) => { if (!event.target.files[0]) return; showToast("正面照已读取，已可用于发型模拟流程"); $("#uploadHair").textContent = "照片已准备"; });
   $("#profileForm").addEventListener("submit", submitProfile); $("#editProfile").addEventListener("click", () => showProfileStep("setup")); $("#createBodyProfile").addEventListener("click", () => showProfileStep("setup")); $("#startCapture").addEventListener("click", () => showProfileStep("capture")); $$('[data-profile-step]').forEach((button) => button.addEventListener("click", () => showProfileStep(button.dataset.profileStep)));
   $("#openCamera").addEventListener("click", openCamera); $("#capturePhoto").addEventListener("click", capturePhoto); $("#bodyPhoto").addEventListener("change", (event) => loadBodyPhoto(event.target.files[0])); $("#downloadBodyPhoto").addEventListener("click", downloadBodyPhoto); $("#avatarFile").addEventListener("change", (event) => importAvatar(event.target.files[0])); $("#finishProfile").addEventListener("click", () => { renderProfileOverview(); showProfileStep("overview"); }); window.addEventListener("pagehide", stopCamera);
 }

@@ -4,9 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#f3eee4">
+  <link rel="icon" href="data:,">
   <title>自如 · 个人外形 Agent Demo</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="framework.css">
+  <link rel="stylesheet" href="v2.css">
 </head>
 <body>
 <div class="app-shell">
@@ -51,24 +53,27 @@
     </section>
 
     <section id="view-wardrobe" class="view" data-view-panel="wardrobe">
-      <div class="page-title"><p class="eyebrow">真实交互 · 本次会话</p><h1>我的衣橱</h1><p>原始照片只是导入材料；系统整理成独立单品后，才能用于日常搭配。</p></div>
+      <div class="page-title wardrobe-title"><div><p class="eyebrow">12 件单品 · 本地管理</p><h1>我的衣橱</h1><p>拍下实物或导入商品图，整理成统一单品后再搭配。</p></div><button id="uploadGarment" class="closet-add" aria-label="添加衣物">＋</button></div>
       <div class="route-grid">
-        <button id="uploadGarment" class="route-card"><span>＋</span><b>上传衣物</b><small>拍实物 / 从相册选择</small></button>
-        <button id="loadDemoCloset" class="route-card"><span>例</span><b>加入示例衣橱</b><small>快速体验组合功能</small></button>
+        <button id="scanGarment" class="route-card"><span>拍</span><b>拍照录入</b><small>AI 整理为独立单品</small></button>
+        <button id="loadDemoCloset" class="route-card"><span>例</span><b>恢复示例衣橱</b><small>12 件统一单品素材</small></button>
       </div>
       <input id="garmentFile" type="file" accept="image/*" capture="environment" hidden>
-      <p id="wardrobeStatus" class="status-line" aria-live="polite">正式流程：上传原图 → 识别衣物 → 去除背景 → 确认分类 → 保存为衣橱单品。当前自动抠图尚未接入。</p>
+      <p id="wardrobeStatus" class="status-line" aria-live="polite">照片仅在本机处理。Demo 会估算背景并生成统一商品卡，你可以确认名称和分类后保存。</p>
 
       <div class="filter-row" role="tablist" aria-label="衣橱分类">
         <button class="chip active" data-closet-category="all">全部</button>
         <button class="chip" data-closet-category="top">上衣</button>
+        <button class="chip" data-closet-category="outer">外套</button>
+        <button class="chip" data-closet-category="skirt">半身裙</button>
         <button class="chip" data-closet-category="bottom">裤子</button>
+        <button class="chip" data-closet-category="dress">连体裙</button>
         <button class="chip" data-closet-category="shoe">鞋子</button>
       </div>
       <div id="closetGrid" class="closet-grid"></div>
 
-      <div class="section-heading"><div><p class="eyebrow">衣橱内功能</p><h2>今天这样穿</h2></div><button id="clearBoard" class="text-button">清空</button></div>
-      <p class="disclosure">画板应使用去除背景后的独立上衣、裤子和鞋子，而不是把几张原始照片并排。平铺搭配不产生生图费用。</p>
+      <div class="section-heading"><div><p class="eyebrow">DIY LOOK</p><h2>今天这样穿</h2></div><div><button id="autoCompose" class="text-button">智能排版</button><button id="clearBoard" class="text-button">清空</button></div></div>
+      <p class="disclosure">点选单品加入画布，拖动调整位置。搭配画布使用整理后的独立单品，不产生生图费用。</p>
       <div id="outfitBoard" class="outfit-board"><div id="boardEmpty" class="board-empty"><b>空白搭配画布</b><small>从衣橱选择上衣、裤子和鞋子</small></div></div>
       <div class="board-actions"><button id="saveOutfit" class="main-button">保存这套穿搭</button><button id="boardTryon" class="secondary-button">生成上身效果</button></div>
       <div id="savedOutfits" class="saved-outfits"></div>
@@ -117,10 +122,10 @@
     </section>
 
     <section id="view-imagine" class="view" data-view-panel="imagine">
-      <div class="page-title"><p class="eyebrow">未来方向 · 模拟数据</p><h1>探索不同的自己</h1><p>这些交互展示未来方向，当前不进行医疗判断，也不预测真实身体变化。</p></div>
+      <div class="page-title"><p class="eyebrow">个人形象管理 · 模拟数据</p><h1>探索不同的自己</h1><p>收藏发型方案、记录面部状态，并形成可以持续更新的个人风格档案。</p></div>
       <div class="choice-row reference-tabs"><button class="active" data-reference="hair">发型发色</button><button data-reference="face">面部与皮肤</button><button data-reference="shape">身形档案</button><button data-reference="posture">体态观察</button></div>
-      <div class="reference-panel active" data-reference-panel="hair"><div id="hairGallery" class="reference-gallery"><button class="reference-card active" data-hair="short"><img src="assets/hair-short.jpg" alt="自然短发参考"><b>自然短发</b><small>突出颈肩</small></button><button class="reference-card" data-hair="curly"><img src="assets/hair-curly.jpg" alt="卷发参考"><b>蓬松卷发</b><small>增加轮廓感</small></button><button class="reference-card" data-hair="long"><img src="assets/hair-long.jpg" alt="长发参考"><b>长层次发</b><small>强化纵向线条</small></button><button class="reference-card" data-hair="red"><img src="assets/hair-red.jpg" alt="暖红短发参考"><b>暖红短发</b><small>面部附近更醒目</small></button></div><article id="hairResult" class="data-result"><b>自然短发 · 参考分析</b><p>颈肩区域更清楚，适合比较领口和肩线。</p><button class="secondary-button">用我的照片模拟</button></article></div>
-      <div class="reference-panel" data-reference-panel="face"><article class="panel"><h2>今天想关注什么？</h2><div class="choice-row"><button class="active" data-face="tone">肤色与配色</button><button data-face="skin">皮肤状态记录</button><button data-face="brow">眉形与眼镜</button></div></article><article id="faceResult" class="data-result"><b>肤色与配色 · 示例</b><p>当前为模拟结论：低饱和蓝绿色放在面部附近更柔和。未来可比较同一用户不同时期的照片，但不作皮肤疾病诊断。</p></article></div>
+      <div class="reference-panel active" data-reference-panel="hair"><div class="reference-toolbar"><div><b>我的发型灵感</b><small>已收藏 4 个方向</small></div><button id="uploadHair" class="secondary-button">上传正面照</button></div><input id="hairPhoto" type="file" accept="image/*" hidden><div id="hairGallery" class="reference-gallery"><button class="reference-card active" data-hair="short"><img src="assets/hair-short.jpg" alt="自然短发参考"><b>轻盈短层次</b><small>利落 · 低打理成本</small></button><button class="reference-card" data-hair="curly"><img src="assets/hair-curly.jpg" alt="卷发参考"><b>蓬松纹理卷</b><small>丰盈 · 强轮廓</small></button><button class="reference-card" data-hair="long"><img src="assets/hair-long.jpg" alt="长发参考"><b>长层次直发</b><small>柔和 · 修饰颧骨</small></button><button class="reference-card" data-hair="red"><img src="assets/hair-red.jpg" alt="暖红短发参考"><b>暖栗红短发</b><small>显色 · 强化面部焦点</small></button></div><article id="hairResult" class="data-result appearance-result"><div><span class="result-kicker">当前方案</span><b>轻盈短层次</b><p>露出颈肩线，适合圆领、方领与利落通勤风。</p></div><div class="style-facts"><span><small>长度</small><b>耳下 3 cm</b></span><span><small>打理</small><b>约 6 分钟</b></span><span><small>适合色</small><i class="color-dots"><em></em><em></em><em></em></i></span></div><button class="secondary-button">用我的照片模拟</button></article></div>
+      <div class="reference-panel" data-reference-panel="face"><div class="face-overview"><div class="face-portrait"><img src="assets/hair-short.jpg" alt="面部档案示例"><span>示例档案</span></div><div><p class="eyebrow">本周记录</p><h2>整体状态稳定</h2><p>统一光线下记录，关注趋势而不是单次分数。</p><div class="face-score"><span style="--score:82%"><b>82</b><small>水润感</small></span><span style="--score:74%"><b>74</b><small>均匀度</small></span><span style="--score:88%"><b>88</b><small>稳定度</small></span></div></div></div><div class="choice-row face-tabs"><button class="active" data-face="tone">肤色配色</button><button data-face="skin">状态记录</button><button data-face="brow">眉形眼镜</button></div><article id="faceResult" class="data-result appearance-result"><div><span class="result-kicker">模拟分析</span><b>中性偏暖 · 低对比</b><p>雾霾蓝、鼠尾草绿和柔白靠近面部时更协调；避免大面积荧光色。</p></div><div class="palette-row"><span style="--swatch:#8ba5a0"></span><span style="--swatch:#adc0a2"></span><span style="--swatch:#f2eee5"></span><span style="--swatch:#bc8b75"></span></div></article></div>
       <div class="reference-panel" data-reference-panel="shape"><article class="panel"><div class="panel-title"><div><p class="eyebrow">身体本身的客观外形</p><h2>我的身形档案</h2></div><span>来自标准照与基础资料</span></div><div id="shapeMetricGrid" class="appearance-metric-grid"></div></article><article class="data-result"><b>身形不等于体态，也不等于穿衣效果</b><p>这里保存头身、上下身和肩部等身体比例；宽松度、落肩和衣长属于具体衣服的穿着效果。</p></article></div>
       <div class="reference-panel" data-reference-panel="posture"><article class="panel"><div class="panel-title"><div><p class="eyebrow">站立姿势与动态表现</p><h2>体态观察维度</h2></div><span>未来视频能力</span></div><div class="posture-category-grid"><button class="active" data-posture="head"><b>头颈</b><small>前伸与左右偏斜</small></button><button data-posture="shoulder"><b>肩背</b><small>圆肩与高低肩</small></button><button data-posture="trunk"><b>躯干</b><small>侧倾与左右旋转</small></button><button data-posture="pelvis"><b>骨盆</b><small>前后倾与高低差</small></button><button data-posture="legs"><b>下肢</b><small>膝盖方向与站姿受力</small></button><button data-posture="gait"><b>动态步态</b><small>步幅、摆臂与重心</small></button></div></article><article id="postureResult" class="data-result"><b>头颈位置 · 模拟观察</b><p>未来通过规范正侧面照片或短视频，观察头部是否前伸或左右偏斜；只提供日常改善提示，不作医疗诊断。</p></article></div>
     </section>
@@ -160,6 +165,7 @@
         <button type="button" class="back-button" data-profile-step="capture">← 重拍</button>
         <article class="analysis-hero"><img id="analysisPhoto" alt="用于身体比例分析的原始照片"><div><p class="eyebrow">正面身形档案</p><h2>已建立基础比例</h2><p>所有结果来自单张照片，只作为穿衣轮廓参考。</p></div></article>
         <div id="bodyMetrics" class="metric-grid"></div>
+        <p id="measurementEstimateNote" class="status-line">厘米结果为身高标定后的二维姿态估算，不替代软尺量体。</p>
         <article class="profile-group"><p class="eyebrow">二维基础形象</p><h2>生成白 T 恤＋牛仔裤的标准形象</h2><p>当前比赛 Demo 先由 Codex 人工生成：下载原图发给我，生成后再导回。原图用于测量，生成图只用于展示和换衣服。</p><div class="board-actions"><button id="downloadBodyPhoto" type="button" class="secondary-button">下载原图</button><label class="secondary-button">导入生成图<input id="avatarFile" type="file" accept="image/*" hidden></label></div></article>
         <button id="finishProfile" type="button" class="main-button">保存并回到我的档案</button>
       </section>
@@ -170,8 +176,10 @@
 </div>
 
 <dialog id="infoDialog"><button class="dialog-close" aria-label="关闭">×</button><h2>这一版怎样理解？</h2><ul><li><b>产品底座：</b>个人外形档案，让身形、衣橱、穿搭和未来能力共享同一个“我”。</li><li><b>真实交互：</b>本地外形档案、衣物上传、衣橱选择、搭配画布和保存搭配。</li><li><b>辅助能力：</b>穿着效果比较中包含尺码建议，但尺码不是产品中心。</li><li><b>流程模拟：</b>AI 抠图、真人试穿和 Agent 生成。</li><li><b>未来展示：</b>发型、面部、皮肤、身形与体态使用明确标记的模拟数据。</li></ul><p>所有模块共享同一个“我”，但用户可以只用衣橱或只用试穿，不需要完成固定流程。</p></dialog>
+<dialog id="garmentDialog" class="garment-dialog"><button class="dialog-close" id="closeGarmentDialog" aria-label="关闭">×</button><p class="eyebrow">AI 单品整理</p><h2 id="garmentDialogTitle">正在识别这件衣物</h2><div class="garment-process"><figure><span>原始照片</span><img id="garmentOriginal" alt="上传的衣物原图"></figure><figure class="generated"><span>整理结果</span><div id="garmentProcessing" class="garment-processing"><i></i><small>识别轮廓与背景</small></div><img id="garmentGenerated" alt="整理后的独立单品" hidden></figure></div><form id="garmentForm" hidden><div class="garment-fields"><label>单品名称<input id="garmentName" value="我的新单品" required></label><label>分类<select id="garmentCategory"><option value="top">上衣</option><option value="outer">外套</option><option value="skirt">半身裙</option><option value="bottom">裤子</option><option value="dress">连体裙</option><option value="shoe">鞋子</option></select></label></div><p class="status-line">Demo 使用本地像素估算整理背景，复杂场景下仍需正式视觉模型复核。</p><button class="main-button">确认并加入衣橱</button></form></dialog>
 <div id="toast" role="status" aria-live="polite"></div>
 <script src="capture-coach.js"></script>
+<script src="body-estimator.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

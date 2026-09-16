@@ -4,13 +4,13 @@
 
 ## 边界
 
-本合同只验证移动浏览器采集、关键点、质量拒绝、身高图像标定和多帧汇总的数据链路，不声称普通 RGB 相机已经能得到可靠厘米尺寸。当前使用手工关键点 mock；MediaPipe 尚未接入。未来适配器必须记录模型版本、逐点置信度和坐标变换。
+本合同验证移动浏览器采集、关键点、质量拒绝、身高图像标定和多帧汇总的数据链路，不声称普通 RGB 相机已经能得到可靠厘米尺寸。Web Demo 已接入 MediaPipe Pose Landmarker，并输出姿态肩点跨度、投影臂长和投影腿长的实验区间；风险 Spike 仍保留手工关键点 mock 供确定性测试。适配器必须记录模型版本、逐点置信度和坐标变换。
 
 ## 不得混用的肩部字段
 
 | 字段 | 定义 | 当前状态 |
 |---|---|---|
-| `pose_landmark_shoulder_span` | 姿态模型左右肩语义点的图像跨度 | 当前为手工 mock |
+| `pose_landmark_shoulder_span` | 姿态模型左右肩语义点的图像跨度 | Web Demo 已接入；未经真人校准 |
 | `body_visual_shoulder_width_cm` | 轮廓/映射模型估计的视觉体表肩宽 | 尚未实现，需真人校准 |
 | `body_biacromial_width_cm` | 左右肩峰间人工软尺真值 | 预实验人工采集 |
 | `garment_seam_to_seam_shoulder_cm` | 成衣平铺两肩缝间宽度 | 来自商品或人工量衣 |
@@ -46,4 +46,4 @@ experimental_height_scaled_span_cm = pose_shoulder_pixel_span × cm_per_pixel
 
 ## 后续接入门槛
 
-接入 MediaPipe 前增加固定图片回归用例；接入后对比姿态肩点与人工肩峰点系统偏差，并在真实 iOS Safari、Android Chrome 测试权限和性能。预实验达标后，才讨论 `body_visual_shoulder_width_cm` 映射函数。
+继续增加固定图片回归用例，对比姿态肩点与人工肩峰点系统偏差，并在真实 iOS Safari、Android Chrome 测试权限和性能。预实验达标后，才讨论 `body_visual_shoulder_width_cm` 映射函数。
