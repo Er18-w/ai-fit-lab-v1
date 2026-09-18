@@ -11,6 +11,7 @@
 - `hair-curly.jpg`: Pexels / Built By King, photo `9928018`
 - `hair-long.jpg`: Pexels / Joseilson De lima, photo `36784935`
 - `hair-red.jpg`: Pexels / Christina Chekhomova, photo `11054052`
+- `editorial-autumn-woman.jpg`: Unsplash, photo `1733379056005-24b474d8f8a1`
 
 The `wardrobe-*` files are temporary product-reference images collected from
 Pinterest search results on 2026-09-16 for this non-commercial prototype. They

@@ -143,33 +143,33 @@ function readImageFile(file, done) {
   reader.readAsDataURL(file);
 }
 
-function createGarmentCutout(imageUrl, done) {
-  const image = new Image();
-  image.onload = () => {
-    const max = 900, scale = Math.min(1, max / Math.max(image.naturalWidth, image.naturalHeight));
-    const canvas = document.createElement("canvas"); canvas.width = Math.round(image.naturalWidth * scale); canvas.height = Math.round(image.naturalHeight * scale);
-    const context = canvas.getContext("2d", { willReadFrequently: true }); context.drawImage(image, 0, 0, canvas.width, canvas.height);
-    const pixels = context.getImageData(0, 0, canvas.width, canvas.height), data = pixels.data;
-    const samples = [[2,2],[canvas.width-3,2],[2,canvas.height-3],[canvas.width-3,canvas.height-3]].map(([x,y]) => { const i=(y*canvas.width+x)*4; return [data[i],data[i+1],data[i+2]]; });
-    const bg = samples.reduce((sum, color) => sum.map((value, i) => value + color[i] / samples.length), [0,0,0]);
-    for (let i=0;i<data.length;i+=4) { const distance = Math.hypot(data[i]-bg[0],data[i+1]-bg[1],data[i+2]-bg[2]); if (distance < 28) data[i+3]=0; else if (distance < 62) data[i+3]=Math.round(data[i+3]*(distance-28)/34); }
-    context.putImageData(pixels,0,0); done(canvas.toDataURL("image/png"));
-  };
-  image.src = imageUrl;
-}
-
-function addUploadedGarment(file) {
-  readImageFile(file, (image) => {
-    const dialog = $("#garmentDialog"); $("#garmentOriginal").src = image; $("#garmentGenerated").hidden = true; $("#garmentProcessing").hidden = false; $("#garmentForm").hidden = true; $("#garmentDialogTitle").textContent = "正在识别这件衣物"; dialog.dataset.image = ""; dialog.showModal();
-    setTimeout(() => createGarmentCutout(image, (generated) => { dialog.dataset.image = generated; $("#garmentGenerated").src = generated; $("#garmentGenerated").hidden = false; $("#garmentProcessing").hidden = true; $("#garmentForm").hidden = false; $("#garmentDialogTitle").textContent = "确认 AI 整理结果"; }), 650);
-  });
+async function addUploadedGarment(file, source = "upload") {
+  if (!file) return;
+  const dialog = $("#garmentDialog");
+  const temporaryUrl = URL.createObjectURL(file);
+  $("#garmentOriginal").src = temporaryUrl; $("#garmentGenerated").hidden = true; $("#garmentProcessing").hidden = false; $("#garmentForm").hidden = true; $("#garmentQuality").hidden = true; $("#garmentDialogTitle").textContent = "正在检查这张衣物图片"; dialog.dataset.image = ""; dialog.dataset.provider = ""; dialog.showModal();
+  try {
+    const result = await window.GarmentProcessor.processGarment({ file, source, onProgress: (_stage, message) => { $("#garmentProcessingText").textContent = message; } });
+    dialog.dataset.image = result.images.transparent || result.images.preview || result.images.enhanced || result.images.original;
+    dialog.dataset.provider = result.provider || "api";
+    $("#garmentOriginal").src = result.images.original;
+    $("#garmentGenerated").src = dialog.dataset.image;
+    $("#garmentGenerated").hidden = false; $("#garmentProcessing").hidden = true; $("#garmentForm").hidden = false;
+    $("#garmentName").value = result.garment?.name || "我的新单品"; $("#garmentCategory").value = result.garment?.category || "top"; $("#garmentColor").value = result.garment?.color === "待确认" ? "" : result.garment?.color || "";
+    const warnings = result.quality?.warnings || [];
+    $("#garmentQuality").hidden = false; $("#garmentQuality").classList.toggle("warning", !result.quality?.accepted);
+    $("#garmentQuality").innerHTML = `<b>${result.quality?.accepted ? "图片质量可用" : "建议重新拍摄"}</b><span>${warnings.length ? warnings.join("；") : "光线和分辨率正常，请确认衣物边缘。"}</span>`;
+    $("#garmentDialogTitle").textContent = result.quality?.accepted ? "确认整理结果" : "图片质量有限，请确认是否继续";
+  } catch {
+    $("#garmentProcessing").hidden = true; $("#garmentQuality").hidden = false; $("#garmentQuality").classList.add("warning"); $("#garmentQuality").innerHTML = "<b>处理失败</b><span>请关闭后重新选择图片。服务器接口不可用时会自动使用本地流程。</span>"; $("#garmentDialogTitle").textContent = "没有完成图片处理";
+  } finally { URL.revokeObjectURL(temporaryUrl); }
 }
 
 function saveUploadedGarment(event) {
-  event.preventDefault(); const dialog = $("#garmentDialog"), name = $("#garmentName").value.trim() || "我的新单品", category = $("#garmentCategory").value;
-  state.closet.unshift({ id: `upload-${Date.now()}`, name, category, image: dialog.dataset.image || $("#garmentOriginal").src, note: "本地 AI 整理 · 用户确认", color: "待补充", season: "四季", match: 87, data: "用户上传 · 本机保存" });
+  event.preventDefault(); const dialog = $("#garmentDialog"), name = $("#garmentName").value.trim() || "我的新单品", category = $("#garmentCategory").value, color = $("#garmentColor").value.trim() || "待补充";
+  state.closet.unshift({ id: `upload-${Date.now()}`, name, category, image: dialog.dataset.image || $("#garmentOriginal").src, note: "图片整理 · 用户确认", color, season: "四季", match: 87, data: `用户上传 · ${dialog.dataset.provider || "本地"}` });
   try { localStorage.setItem("ziru-demo-custom-closet", JSON.stringify(state.closet.filter((item) => item.id.startsWith("upload-")))); } catch {}
-  dialog.close(); $("#garmentFile").value = ""; $("#wardrobeStatus").textContent = `“${name}”已整理并加入衣橱，可以直接用于 DIY 搭配。`; renderWardrobe(); showToast("新单品已加入衣橱");
+  dialog.close(); $("#garmentFile").value = ""; $("#garmentCameraFile").value = ""; $("#wardrobeStatus").textContent = `“${name}”已整理并加入衣橱，可以直接用于 DIY 搭配。`; renderWardrobe(); showToast("新单品已加入衣橱");
 }
 
 function autoCompose() {
@@ -487,8 +487,8 @@ function bindEvents() {
   $$('[data-view]').forEach((button) => button.addEventListener("click", () => { showView(button.dataset.view); if (button.dataset.referenceJump) showReference(button.dataset.referenceJump); }));
   $("#demoInfo").addEventListener("click", () => $("#infoDialog").showModal()); $(".dialog-close").addEventListener("click", () => $("#infoDialog").close()); $("#infoDialog").addEventListener("click", (event) => { if (event.target === $("#infoDialog")) $("#infoDialog").close(); });
   $("#runAgent").addEventListener("click", runAgent); $("#agentPrompt").addEventListener("keydown", (event) => { if (event.key === "Enter") runAgent(); });
-  $("#uploadGarment").addEventListener("click", () => $("#garmentFile").click()); $("#scanGarment").addEventListener("click", () => $("#garmentFile").click()); $("#garmentFile").addEventListener("change", (event) => addUploadedGarment(event.target.files[0]));
-  $("#closeGarmentDialog").addEventListener("click", () => $("#garmentDialog").close()); $("#garmentForm").addEventListener("submit", saveUploadedGarment);
+  $("#uploadGarment").addEventListener("click", () => $("#garmentFile").click()); $("#importGarmentImage").addEventListener("click", () => $("#garmentFile").click()); $("#scanGarment").addEventListener("click", () => $("#garmentCameraFile").click()); $("#garmentFile").addEventListener("change", (event) => addUploadedGarment(event.target.files[0], "product_image")); $("#garmentCameraFile").addEventListener("change", (event) => addUploadedGarment(event.target.files[0], "camera"));
+  $("#closeGarmentDialog").addEventListener("click", () => { $("#garmentDialog").close(); $("#garmentFile").value = ""; $("#garmentCameraFile").value = ""; }); $("#garmentForm").addEventListener("submit", saveUploadedGarment);
   $("#loadDemoCloset").addEventListener("click", () => { state.closet = [...products]; localStorage.removeItem("ziru-demo-custom-closet"); $("#wardrobeStatus").textContent = "已恢复 12 件统一示例单品，可直接点选组合。"; renderWardrobe(); });
   $$('[data-closet-category]').forEach((button) => button.addEventListener("click", () => { state.closetCategory = button.dataset.closetCategory; $$('[data-closet-category]').forEach((item) => item.classList.toggle("active", item === button)); renderWardrobe(); }));
   $("#clearBoard").addEventListener("click", () => { state.board = []; state.boardPositions = {}; renderWardrobe(); renderBoard(); }); $("#autoCompose").addEventListener("click", autoCompose); $("#saveOutfit").addEventListener("click", saveOutfit); $("#boardTryon").addEventListener("click", () => showView("tryon"));

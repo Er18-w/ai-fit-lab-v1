@@ -6,22 +6,28 @@
   <meta name="theme-color" content="#f3eee4">
   <link rel="icon" href="data:,">
   <title>自如 · 个人外形 Agent Demo</title>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="framework.css">
-  <link rel="stylesheet" href="v2.css">
+  <link rel="stylesheet" href="styles.css?v=20260918-2">
+  <link rel="stylesheet" href="framework.css?v=20260918-2">
+  <link rel="stylesheet" href="v2.css?v=20260918-2">
+  <link rel="stylesheet" href="magazine.css?v=20260918-2">
+  <link rel="stylesheet" href="reference-replica.css?v=20260918-3">
 </head>
 <body>
 <div class="app-shell">
   <header class="topbar">
-    <button class="brand" data-view="home" aria-label="返回首页"><span>自如</span><small>个人外形 Agent</small></button>
-    <button id="demoInfo" class="text-button">演示说明</button>
+    <button class="brand" data-view="home" aria-label="返回首页"><span>AI Fit Lab</span><small>个人外形 Agent</small></button>
+    <button id="demoInfo" class="topbar-icon" aria-label="演示说明"><i data-lucide="info"></i></button>
   </header>
 
   <main>
     <section id="view-home" class="view active" data-view-panel="home">
+      <article class="editorial-hero hero-home" data-reveal>
+        <div class="hero-copy"><h1>今天想怎么穿？</h1><em>What's your plan today?</em><span>用 AI，找到更适合你的穿搭灵感</span><small>Better Outfits<br>A Kinder You</small></div>
+        <div class="hero-polaroid"><img src="assets/editorial-autumn-woman.jpg" alt="秋日穿搭人物参考"><span>穿上喜欢的自己<br>就是最好的计划 ♡</span></div><i class="autumn-leaf leaf-one">◆</i>
+      </article>
       <article class="agent-card">
-        <p class="eyebrow">我的 Agent</p>
-        <h1>今天想让自己看起来怎么样？</h1>
+        <p class="eyebrow">TODAY'S PLAN</p>
+        <h1>今天的穿搭计划是？</h1>
         <div class="agent-input"><input id="agentPrompt" value="明天上班，想穿得利落一点，但不要太正式"><button id="runAgent">告诉自如</button></div>
         <div id="agentReply" class="agent-reply" hidden></div>
       </article>
@@ -32,15 +38,15 @@
       </article>
 
       <div class="quick-grid home-actions">
-        <button class="feature-card primary-feature" data-view="wardrobe"><span class="feature-icon">衣</span><b>打开我的衣橱</b><small>录入、整理和组合已有衣物</small></button>
-        <button class="feature-card" data-view="tryon"><span class="feature-icon">试</span><b>看看上身效果</b><small>按次生成 · 当前为流程模拟</small></button>
-        <button class="feature-card" data-view="shop"><span class="feature-icon">选</span><b>帮我挑一件衣服</b><small>比较穿着效果，尺码只是建议之一</small></button>
-        <button class="feature-card" data-view="imagine"><span class="feature-icon">变</span><b>探索不同的我</b><small>身形、体态、发型与面部方向</small></button>
+        <button class="feature-card primary-feature" data-view="wardrobe"><span class="feature-media"><img src="assets/product-flatlay.jpg" alt="衣橱搭配"></span><b>从衣橱里选一套</b><small>用已有单品快速搭配</small><i data-lucide="arrow-right"></i></button>
+        <button class="feature-card" data-view="tryon"><span class="feature-media"><img src="assets/editorial-autumn-woman.jpg" alt="人物试穿"></span><b>试试看上身效果</b><small>AI 试穿，所见即所得</small><i data-lucide="arrow-right"></i></button>
+        <button class="feature-card" data-view="imagine"><span class="feature-media"><img src="assets/hair-short.jpg" alt="形象探索"></span><b>探索不同的自己</b><small>解锁更多穿搭可能</small><i data-lucide="arrow-right"></i></button>
+        <button class="feature-card optional-feature" data-view="shop"><span class="feature-icon">选</span><b>帮我挑一件衣服</b><small>比较轮廓和尺码建议</small></button>
       </div>
 
       <article class="today-card">
-        <div><p class="eyebrow">22°C · 多云 · 通勤</p><h2>从衣橱里选一套</h2><p>白色上衣、深色直筒裤和浅色运动鞋，颜色克制，行动方便。</p></div>
-        <button class="secondary-button" data-view="wardrobe">去组合</button>
+        <div><p class="eyebrow">TODAY'S PICKS</p><h2>今日推荐</h2><p>温柔约会、都市通勤、文艺出行，为今天保存一套方向。</p></div>
+        <div class="today-looks"><button data-view="wardrobe"><img src="assets/product-flatlay.jpg" alt="都市通勤"><b>01 都市通勤</b></button><button data-view="wardrobe"><img src="assets/wardrobe-skirt-long.jpg" alt="温柔约会"><b>02 温柔约会</b></button><button data-view="wardrobe"><img src="assets/wardrobe-outer-black.jpg" alt="文艺出行"><b>03 文艺出行</b></button></div>
       </article>
 
       <div class="section-heading"><div><p class="eyebrow">以后可以继续完善</p><h2>同一个“我”的更多能力</h2></div></div>
@@ -53,13 +59,16 @@
     </section>
 
     <section id="view-wardrobe" class="view" data-view-panel="wardrobe">
-      <div class="page-title wardrobe-title"><div><p class="eyebrow">12 件单品 · 本地管理</p><h1>我的衣橱</h1><p>拍下实物或导入商品图，整理成统一单品后再搭配。</p></div><button id="uploadGarment" class="closet-add" aria-label="添加衣物">＋</button></div>
-      <div class="route-grid">
-        <button id="scanGarment" class="route-card"><span>拍</span><b>拍照录入</b><small>AI 整理为独立单品</small></button>
-        <button id="loadDemoCloset" class="route-card"><span>例</span><b>恢复示例衣橱</b><small>12 件统一单品素材</small></button>
-      </div>
-      <input id="garmentFile" type="file" accept="image/*" capture="environment" hidden>
-      <p id="wardrobeStatus" class="status-line" aria-live="polite">照片仅在本机处理。Demo 会估算背景并生成统一商品卡，你可以确认名称和分类后保存。</p>
+      <article class="editorial-hero hero-wardrobe" data-reveal><div class="hero-copy"><h1>我的衣橱</h1><em>My Wardrobe</em><span>上传你的衣服，让 AI 帮你搭出更多可能</span><small>Better Outfits<br>A Kinder You</small></div><div class="hero-polaroid"><img src="assets/editorial-autumn-woman.jpg" alt="秋日衣橱人物"><span>把喜欢的衣服<br>都放进我的衣橱 ♡</span></div><i class="autumn-leaf leaf-two">◆</i></article>
+      <section class="wardrobe-import-sheet"><div class="page-title wardrobe-title"><div><h1>如何添加衣服？</h1><p>原始照片只是导入材料，整理成独立单品后再用于搭配。</p></div><button id="uploadGarment" class="closet-add" aria-label="添加衣物"><i data-lucide="plus"></i></button></div>
+      <div class="route-grid wardrobe-routes">
+        <button id="importGarmentImage" class="route-card"><span><i data-lucide="image"></i></span><b>导入商品图</b><small>从相册选择购买记录截图</small></button>
+        <button id="scanGarment" class="route-card"><span><i data-lucide="camera"></i></span><b>拍摄现有衣物</b><small>检测光线并整理为独立单品</small></button>
+        <button id="loadDemoCloset" class="route-card"><span><i data-lucide="shirt"></i></span><b>恢复示例衣橱</b><small>12 件统一单品素材</small></button>
+      </div><div class="process-ribbon"><span><i data-lucide="image"></i> 上传原图</span><i data-lucide="arrow-right"></i><span><i data-lucide="scan"></i> 识别衣物</span><i data-lucide="arrow-right"></i><span><i data-lucide="shirt"></i> 生成单品图</span><i data-lucide="arrow-right"></i><span><i data-lucide="circle-check"></i> 用于搭配</span></div></section>
+      <input id="garmentFile" type="file" accept="image/*" hidden>
+      <input id="garmentCameraFile" type="file" accept="image/*" capture="environment" hidden>
+      <p id="wardrobeStatus" class="status-line" aria-live="polite">当前使用本地预处理模拟。服务器上线后将接入开源 rembg，页面流程和衣橱数据结构无需改变。</p>
 
       <div class="filter-row" role="tablist" aria-label="衣橱分类">
         <button class="chip active" data-closet-category="all">全部</button>
@@ -80,6 +89,7 @@
     </section>
 
     <section id="view-shop" class="view" data-view-panel="shop">
+      <article class="editorial-hero hero-shop" data-reveal><div class="hero-copy"><p>FIT BEFORE SIZE</p><h1>挑一件合适的衣服</h1><em>Find your fit</em><span>先理解想要的轮廓，再比较成衣尺寸。</span></div></article>
       <div class="page-title"><p class="eyebrow">穿衣决策中的一个能力</p><h1>这件衣服能穿出我想要的效果吗？</h1><p>先判断轮廓、松量和长度，再把尺码作为实现目标效果的一条建议。</p></div>
       <div class="route-grid">
         <button id="uploadProduct" class="route-card"><span>＋</span><b>上传商品</b><small>商品图 / 尺码表 / 截图</small></button>
@@ -109,10 +119,11 @@
     </section>
 
     <section id="view-tryon" class="view" data-view-panel="tryon">
+      <article class="editorial-hero hero-tryon" data-reveal><div class="hero-copy"><h1>试试看上身效果</h1><em>Try It On</em><span>用 AI，提前遇见更好的自己</span><small>See A Better You</small></div><div class="hero-polaroid"><img src="assets/editorial-autumn-woman.jpg" alt="秋季试穿人物"><span>换一种穿搭<br>遇见不一样的自己 ♡</span></div><i class="autumn-leaf leaf-one">◆</i></article>
       <div class="page-title"><p class="eyebrow">独立能力 · 有生成成本</p><h1>真人试穿</h1><p>选择本人标准照片和一套衣服后再生成，不需要先做三维数字人。</p></div>
       <article class="tryon-inputs">
-        <button id="selectPersonPhoto" class="upload-tile"><span>＋</span><b>选择本人照片</b><small>正面全身照效果更稳定</small></button>
-        <button class="upload-tile" data-view="wardrobe"><span>衣</span><b>使用当前搭配</b><small id="tryonOutfitCount">尚未选择衣物</small></button>
+        <button id="selectPersonPhoto" class="upload-tile"><b>选择本人照片</b><small>上传或拍摄清晰的正面照片</small><span class="tryon-tile-image person-upload"><i data-lucide="camera"></i> 上传照片</span></button>
+        <button class="upload-tile" data-view="wardrobe"><b>选择衣服</b><small>从你的衣橱中选择一套搭配</small><span class="tryon-tile-image"><img src="assets/product-flatlay.jpg" alt="当前衣橱搭配"></span><em id="tryonOutfitCount">尚未选择衣物</em></button>
       </article>
       <input id="personPhoto" type="file" accept="image/*" hidden>
       <div id="tryonCanvas" class="tryon-canvas"><div class="person-shape"><span></span></div><p>等待选择照片与衣服</p></div>
@@ -122,6 +133,7 @@
     </section>
 
     <section id="view-imagine" class="view" data-view-panel="imagine">
+      <article class="editorial-hero hero-imagine" data-reveal><div class="hero-copy"><h1>探索不同的自己</h1><em>More possibilities of you</em><span>用 AI，发现更多变化中的你</span><small>Different Looks<br>A Kinder You</small></div><div class="hero-polaroid"><img src="assets/editorial-autumn-woman.jpg" alt="个人风格探索"><span>换一种风格<br>遇见新的自己 ♡</span></div><i class="autumn-leaf leaf-two">◆</i></article>
       <div class="page-title"><p class="eyebrow">个人形象管理 · 模拟数据</p><h1>探索不同的自己</h1><p>收藏发型方案、记录面部状态，并形成可以持续更新的个人风格档案。</p></div>
       <div class="choice-row reference-tabs"><button class="active" data-reference="hair">发型发色</button><button data-reference="face">面部与皮肤</button><button data-reference="shape">身形档案</button><button data-reference="posture">体态观察</button></div>
       <div class="reference-panel active" data-reference-panel="hair"><div class="reference-toolbar"><div><b>我的发型灵感</b><small>已收藏 4 个方向</small></div><button id="uploadHair" class="secondary-button">上传正面照</button></div><input id="hairPhoto" type="file" accept="image/*" hidden><div id="hairGallery" class="reference-gallery"><button class="reference-card active" data-hair="short"><img src="assets/hair-short.jpg" alt="自然短发参考"><b>轻盈短层次</b><small>利落 · 低打理成本</small></button><button class="reference-card" data-hair="curly"><img src="assets/hair-curly.jpg" alt="卷发参考"><b>蓬松纹理卷</b><small>丰盈 · 强轮廓</small></button><button class="reference-card" data-hair="long"><img src="assets/hair-long.jpg" alt="长发参考"><b>长层次直发</b><small>柔和 · 修饰颧骨</small></button><button class="reference-card" data-hair="red"><img src="assets/hair-red.jpg" alt="暖红短发参考"><b>暖栗红短发</b><small>显色 · 强化面部焦点</small></button></div><article id="hairResult" class="data-result appearance-result"><div><span class="result-kicker">当前方案</span><b>轻盈短层次</b><p>露出颈肩线，适合圆领、方领与利落通勤风。</p></div><div class="style-facts"><span><small>长度</small><b>耳下 3 cm</b></span><span><small>打理</small><b>约 6 分钟</b></span><span><small>适合色</small><i class="color-dots"><em></em><em></em><em></em></i></span></div><button class="secondary-button">用我的照片模拟</button></article></div>
@@ -131,6 +143,7 @@
     </section>
 
     <section id="view-profile" class="view" data-view-panel="profile">
+      <article class="editorial-hero hero-profile" data-reveal><div class="hero-copy"><h1>我的</h1><em>My Profile</em><span>更了解自己，穿出更好的你</span><small>Know Yourself<br>Dress Better</small></div><div class="hero-polaroid"><img src="assets/editorial-autumn-woman.jpg" alt="个人档案形象"><span>A Kinder<br>Version of Me ♡</span></div><i class="autumn-leaf leaf-one">◆</i></article>
       <div class="page-title"><p class="eyebrow">共享数据底座</p><h1>我的外形档案</h1><p>原始照片负责比例分析，二维基础形象负责展示和换衣服；两者分开保存。</p></div>
 
       <section id="profileOverview" class="profile-step active">
@@ -172,14 +185,17 @@
     </section>
   </main>
 
-  <nav class="bottom-nav" aria-label="主要导航"><button class="active" data-view="home"><span>⌂</span>Agent</button><button data-view="wardrobe"><span>衣</span>衣橱</button><button data-view="tryon"><span>试</span>试穿</button><button data-view="imagine"><span>变</span>探索</button><button data-view="profile"><span>我</span>我的</button></nav>
+  <nav class="bottom-nav" aria-label="主要导航"><button class="active" data-view="home"><span><i data-lucide="house"></i></span>首页</button><button data-view="wardrobe"><span><i data-lucide="shirt"></i></span>衣橱</button><button data-view="tryon"><span><i data-lucide="sparkles"></i></span>试穿</button><button data-view="imagine"><span><i data-lucide="compass"></i></span>探索</button><button data-view="profile"><span><i data-lucide="user-round"></i></span>我的</button></nav>
 </div>
 
 <dialog id="infoDialog"><button class="dialog-close" aria-label="关闭">×</button><h2>这一版怎样理解？</h2><ul><li><b>产品底座：</b>个人外形档案，让身形、衣橱、穿搭和未来能力共享同一个“我”。</li><li><b>真实交互：</b>本地外形档案、衣物上传、衣橱选择、搭配画布和保存搭配。</li><li><b>辅助能力：</b>穿着效果比较中包含尺码建议，但尺码不是产品中心。</li><li><b>流程模拟：</b>AI 抠图、真人试穿和 Agent 生成。</li><li><b>未来展示：</b>发型、面部、皮肤、身形与体态使用明确标记的模拟数据。</li></ul><p>所有模块共享同一个“我”，但用户可以只用衣橱或只用试穿，不需要完成固定流程。</p></dialog>
-<dialog id="garmentDialog" class="garment-dialog"><button class="dialog-close" id="closeGarmentDialog" aria-label="关闭">×</button><p class="eyebrow">AI 单品整理</p><h2 id="garmentDialogTitle">正在识别这件衣物</h2><div class="garment-process"><figure><span>原始照片</span><img id="garmentOriginal" alt="上传的衣物原图"></figure><figure class="generated"><span>整理结果</span><div id="garmentProcessing" class="garment-processing"><i></i><small>识别轮廓与背景</small></div><img id="garmentGenerated" alt="整理后的独立单品" hidden></figure></div><form id="garmentForm" hidden><div class="garment-fields"><label>单品名称<input id="garmentName" value="我的新单品" required></label><label>分类<select id="garmentCategory"><option value="top">上衣</option><option value="outer">外套</option><option value="skirt">半身裙</option><option value="bottom">裤子</option><option value="dress">连体裙</option><option value="shoe">鞋子</option></select></label></div><p class="status-line">Demo 使用本地像素估算整理背景，复杂场景下仍需正式视觉模型复核。</p><button class="main-button">确认并加入衣橱</button></form></dialog>
+<dialog id="garmentDialog" class="garment-dialog"><button class="dialog-close" id="closeGarmentDialog" aria-label="关闭">×</button><p class="eyebrow">单品图片整理</p><h2 id="garmentDialogTitle">正在检查这张衣物图片</h2><div class="garment-process"><figure><span>原始照片</span><img id="garmentOriginal" alt="上传的衣物原图"></figure><figure class="generated"><span>独立单品</span><div id="garmentProcessing" class="garment-processing"><i></i><small id="garmentProcessingText">检查亮度与分辨率</small></div><img id="garmentGenerated" alt="整理后的独立单品" hidden></figure></div><div id="garmentQuality" class="garment-quality" hidden aria-live="polite"></div><form id="garmentForm" hidden><div class="garment-fields"><label>单品名称<input id="garmentName" value="我的新单品" required></label><label>分类<select id="garmentCategory"><option value="top">上衣</option><option value="outer">外套</option><option value="skirt">半身裙</option><option value="bottom">裤子</option><option value="dress">连体裙</option><option value="shoe">鞋子</option></select></label><label>颜色<input id="garmentColor" placeholder="例如：黑色"></label></div><p class="status-line">处理图只用于衣橱整理和搭配。请对照原图确认颜色、轮廓和细节后保存。</p><button class="main-button">确认并加入衣橱</button></form></dialog>
 <div id="toast" role="status" aria-live="polite"></div>
-<script src="capture-coach.js"></script>
-<script src="body-estimator.js"></script>
-<script src="app.js"></script>
+<script src="capture-coach.js?v=20260918-2"></script>
+<script src="body-estimator.js?v=20260918-2"></script>
+<script src="garment-processor.js?v=20260918-2"></script>
+<script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+<script src="app.js?v=20260918-2"></script>
+<script src="magazine-motion.js?v=20260918-2"></script>
 </body>
 </html>
