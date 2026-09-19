@@ -1,7 +1,5 @@
 # 鞋服 AI 合身与选购助手：POC / V1 项目交接说明
 
-> **历史文档提示（2026-09-18）：** 本文保留早期 POC 的详细技术论证，当前代码状态、仓库地址、产品目标、运行部署方式和下一阶段任务请优先阅读 [`NEXT_AGENT_HANDOFF.md`](./NEXT_AGENT_HANDOFF.md)。
-
 > 文档状态：POC 立项与消费者 V1 前置验证稿  
 > 更新时间：2026-09-15  
 > 面向对象：产品 Agent、前端 Agent、后端 Agent、计算机视觉 Agent、算法 Agent、评审 Agent  
