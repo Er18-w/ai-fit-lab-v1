@@ -24,3 +24,5 @@
 - 缺少可靠胸围时，只输出候选尺码，不输出唯一精准推荐。
 
 详细评审与执行计划见 [`V1_REVIEW_AND_EXECUTION_PLAN.md`](./V1_REVIEW_AND_EXECUTION_PLAN.md)。
+
+接手项目的 Agent 请先阅读 [`NEXT_AGENT_HANDOFF.md`](./NEXT_AGENT_HANDOFF.md)。
